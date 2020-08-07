@@ -5,3 +5,9 @@ sylius_ui:
                 shipping_estimator:
                     template: "@BabDevSyliusShippingEstimatePlugin/Cart/_estimator.html.twig"
                     priority: 9
+
+        sylius.shop.layout.javascripts:
+            blocks:
+                shipping_estimator_javascript:
+                    template: "@BabDevSyliusShippingEstimatePlugin/_javascripts.html.twig"
+                    priority: 0
