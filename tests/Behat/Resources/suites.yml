@@ -2,3 +2,19 @@
 
 default:
     suites:
+        shipping_estimator:
+            contexts:
+                - sylius.behat.context.hook.doctrine_orm
+
+                - sylius.behat.context.transform.channel
+                - sylius.behat.context.transform.product
+
+                - sylius.behat.context.setup.channel
+                - sylius.behat.context.setup.product
+
+                - sylius.behat.context.ui.channel
+                - sylius.behat.context.ui.shop.cart
+                - babdev_sylius_shipping_estimate.behat.context.ui.shop.shipping_estimator
+
+            filters:
+                tags: "@shipping_estimator && @ui"

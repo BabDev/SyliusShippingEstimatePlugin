@@ -1,0 +1,7 @@
+sylius_ui:
+    events:
+        sylius.shop.cart.items:
+            blocks:
+                shipping_estimator:
+                    template: "@BabDevSyliusShippingEstimatePlugin/Cart/_estimator.html.twig"
+                    priority: 9

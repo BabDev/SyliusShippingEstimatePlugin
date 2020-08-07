@@ -1,0 +1,9 @@
+babdev_sylius_shipping_estimate:
+    ui:
+        cost: 'Cost'
+        enter_your_address_to_view_shipping_options: 'Enter your address to view shipping options'
+        estimate_shipping_costs: 'Estimate Shipping Costs'
+        method: 'Method'
+        shipping_not_available: 'Shipping not available'
+        sorry_shipping_is_not_available_to_this_address: 'Sorry, shipping is not available to this address.'
+        view_estimate: 'View Estimate'

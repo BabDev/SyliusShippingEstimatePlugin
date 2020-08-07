@@ -3,6 +3,11 @@
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <defaults public="true" />
-        <!-- Put your Behat services here -->
+
+        <service id="babdev_sylius_shipping_estimate.behat.context.ui.shop.shipping_estimator" class="Tests\BabDev\SyliusShippingEstimatePlugin\Behat\Context\Ui\Shop\ShippingEstimatorContext">
+            <argument type="service" id="babdev_sylius_shipping_estimate.behat.page.shop.cart_summary" />
+        </service>
+
+        <service id="babdev_sylius_shipping_estimate.behat.page.shop.cart_summary" class="Tests\BabDev\SyliusShippingEstimatePlugin\Behat\Page\Shop\SummaryPage" parent="sylius.behat.page.shop.cart_summary" public="false" />
     </services>
 </container>

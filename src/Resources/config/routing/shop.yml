@@ -1,0 +1,17 @@
+babdev_sylius_shipping_estimate_shop_ajax_estimate_shipping:
+    path: /ajax/estimate-shipping
+    methods: [GET]
+    defaults:
+        _controller: babdev_sylius_shipping_estimate.shop.controller.shipping_estimator:estimateShippingAction
+        _format: json
+        _sylius:
+            form: BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType
+
+babdev_sylius_shipping_estimate_shop_partial_shipping_estimator:
+    path: /_partial/shipping-estimator
+    methods: [GET]
+    defaults:
+        _controller: babdev_sylius_shipping_estimate.shop.controller.shipping_estimator:renderWidgetAction
+        _sylius:
+            template: "@BabDevSyliusShippingEstimatePlugin/Cart/Estimator/_widget.html.twig"
+            form: BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType

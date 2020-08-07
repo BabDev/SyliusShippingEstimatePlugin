@@ -1,6 +1,7 @@
 /vendor/
 /node_modules/
 /composer.lock
+/.phpunit.result.cache
 
 /etc/build/*
 !/etc/build/.gitignore

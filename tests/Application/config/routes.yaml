@@ -1,0 +1,5 @@
+babdev_sylius_shipping_estimate_shop:
+    resource: "@BabDevSyliusShippingEstimatePlugin/Resources/config/routing/shop.yml"
+    prefix: /{_locale}
+    requirements:
+        _locale: ^[a-z]{2}(?:_[A-Z]{2})?$

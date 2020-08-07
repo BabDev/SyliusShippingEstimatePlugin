@@ -11,6 +11,11 @@ use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 final class BabDevSyliusShippingEstimateExtension extends Extension
 {
+    public function getAlias(): string
+    {
+        return 'babdev_sylius_shipping_estimate';
+    }
+
     public function load(array $config, ContainerBuilder $container): void
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));

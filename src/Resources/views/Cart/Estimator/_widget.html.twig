@@ -1,0 +1,39 @@
+{% form_theme form '@SyliusShop/Form/theme.html.twig' %}
+
+<div class="ui attached segment" {{ sylius_test_html_attribute('cart-shipping-estimator') }}>
+    <h2 class="ui dividing header">{{ 'babdev_sylius_shipping_estimate.ui.estimate_shipping_costs'|trans }}</h2>
+
+    {{ form_start(form, {'attr': {'class': 'ui form', 'novalidate': 'novalidate', 'id': 'sylius-shipping-estimator', 'data-url': path('babdev_sylius_shipping_estimate_shop_ajax_estimate_shipping')}}) }}
+
+    <div class="ui stackable two column grid">
+        <div class="column">
+            {% include '@SyliusShop/Common/Form/_countryCode.html.twig' with {'form': form.country, 'type': 'shipping-estimate'} %}
+
+            {{ form_row(form.postcode) }}
+        </div>
+        <div class="column">
+            <div class="ui compact info message" id="sylius-shipping-estimator-enter-address">
+                {{ 'babdev_sylius_shipping_estimate.ui.enter_your_address_to_view_shipping_options'|trans }}
+            </div>
+            <div class="ui compact warning message" id="sylius-shipping-estimator-no-shipping-options" style="display: none">
+                <div class="header">{{ 'babdev_sylius_shipping_estimate.ui.shipping_not_available'|trans }}</div>
+                <p>{{ 'babdev_sylius_shipping_estimate.ui.sorry_shipping_is_not_available_to_this_address'|trans }}</p>
+            </div>
+            <table class="ui basic table" id="sylius-shipping-estimator-shipping-options" style="display: none">
+                <thead>
+                    <tr>
+                        <th>{{ 'babdev_sylius_shipping_estimate.ui.method'|trans }}</th>
+                        <th>{{ 'babdev_sylius_shipping_estimate.ui.cost'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="sixteen wide column">
+            <button type="submit" class="ui primary fluid icon labeled button" id="place-order"><i class="shipping fast icon"></i> {{ 'babdev_sylius_shipping_estimate.ui.view_estimate'|trans }}</button>
+        </div>
+    </div>
+
+    {{ form_end(form, {'render_rest': false}) }}
+</div>
+<div class="ui bottom attached error message" id="sylius-shipping-estimator-error" style="display: none"></div>
