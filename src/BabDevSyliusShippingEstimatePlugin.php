@@ -24,6 +24,6 @@ final class BabDevSyliusShippingEstimatePlugin extends Bundle
             $this->containerExtension = new BabDevSyliusShippingEstimateExtension();
         }
 
-        return $this->containerExtension ?: null;
+        return $this->containerExtension ?? null;
     }
 }

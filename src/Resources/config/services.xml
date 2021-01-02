@@ -7,7 +7,6 @@
             <argument type="service" id="sylius.resource_controller.request_configuration_factory" />
             <argument type="service" id="sylius.context.cart" />
             <argument type="service" id="sylius.resource_controller.view_handler" />
-            <argument type="service" id="form.factory" />
             <tag name="controller.service_arguments" />
         </service>
 

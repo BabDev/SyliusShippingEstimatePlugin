@@ -10,12 +10,13 @@ use Sylius\Bundle\ResourceBundle\Controller\RequestConfigurationFactoryInterface
 use Sylius\Bundle\ResourceBundle\Controller\ViewHandlerInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Sylius\Component\Resource\Metadata\MetadataInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-final class ShippingEstimatorController
+final class ShippingEstimatorController extends AbstractController
 {
     /** @var MetadataInterface */
     private $metadata;
@@ -29,21 +30,16 @@ final class ShippingEstimatorController
     /** @var ViewHandlerInterface */
     private $viewHandler;
 
-    /** @var FormFactoryInterface */
-    private $formFactory;
-
     public function __construct(
         MetadataInterface $metadata,
         RequestConfigurationFactoryInterface $requestConfigurationFactory,
         CartContextInterface $cartContext,
-        ViewHandlerInterface $viewHandler,
-        FormFactoryInterface $formFactory
+        ViewHandlerInterface $viewHandler
     ) {
         $this->metadata = $metadata;
         $this->requestConfigurationFactory = $requestConfigurationFactory;
         $this->cartContext = $cartContext;
         $this->viewHandler = $viewHandler;
-        $this->formFactory = $formFactory;
     }
 
     public function estimateShippingAction(Request $request): Response
@@ -63,15 +59,10 @@ final class ShippingEstimatorController
             return $this->viewHandler->handle($configuration, View::create($form));
         }
 
-        $view = View::create()
-            ->setTemplate($configuration->getTemplate('_widget.html'))
-            ->setData([
-                'cart' => $cart,
-                'form' => $form->createView(),
-            ])
-        ;
-
-        return $this->viewHandler->handle($configuration, $view);
+        return $this->render($configuration->getTemplate('_widget.html'), [
+            'cart' => $cart,
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
@@ -85,10 +76,13 @@ final class ShippingEstimatorController
         $formType = (string) $configuration->getFormType();
         $formOptions = $configuration->getFormOptions();
 
+        /** @var FormFactoryInterface $formFactory */
+        $formFactory = $this->get('form.factory');
+
         if ($configuration->isHtmlRequest()) {
-            return $this->formFactory->create($formType, null, $formOptions);
+            return $formFactory->create($formType, null, $formOptions);
         }
 
-        return $this->formFactory->createNamed('', $formType, null, array_merge($formOptions, ['csrf_protection' => false]));
+        return $formFactory->createNamed('', $formType, null, array_merge($formOptions, ['csrf_protection' => false]));
     }
 }

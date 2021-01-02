@@ -1,7 +1,3 @@
-includes:
-    - vendor/phpstan/phpstan-doctrine/extension.neon
-    - vendor/phpstan/phpstan-webmozart-assert/extension.neon
-
 parameters:
     reportUnmatchedIgnoredErrors: false
     checkMissingIterableValueType: false
@@ -15,5 +11,5 @@ parameters:
         - 'tests/Application/src/**.php'
 
     ignoreErrors:
-        - '/Method BabDev\SyliusShippingEstimatePlugin\BabDevSyliusShippingEstimatePlugin::getContainerExtension() should return Symfony\Component\DependencyInjection\Extension\ExtensionInterface|null but returns Symfony\Component\DependencyInjection\Extension\ExtensionInterface|true|null./'
-        - '/Parameter #1 $configuration of method Symfony\Component\DependencyInjection\Extension\Extension::processConfiguration() expects Symfony\Component\Config\Definition\ConfigurationInterface, Symfony\Component\Config\Definition\ConfigurationInterface|null given./'
+        - '/Method BabDev\\SyliusShippingEstimatePlugin\\BabDevSyliusShippingEstimatePlugin::getContainerExtension\(\) should return Symfony\\Component\\DependencyInjection\\Extension\\ExtensionInterface\|null but returns bool\|Symfony\\Component\\DependencyInjection\\Extension\\ExtensionInterface\|null\./'
+        - '/Parameter #1 \$configuration of method Symfony\\Component\\DependencyInjection\\Extension\\Extension::processConfiguration\(\) expects Symfony\\Component\\Config\\Definition\\ConfigurationInterface, Symfony\\Component\\Config\\Definition\\ConfigurationInterface\|null given\./'
