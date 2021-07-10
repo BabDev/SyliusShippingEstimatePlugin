@@ -28,7 +28,7 @@
                 }
 
                 var data = {
-                    countryCode: countrySelect.val(),
+                    country: countrySelect.val(),
                     postcode: postcodeInput.val()
                 }
 
@@ -49,11 +49,13 @@
                     },
                     success: function (response) {
                         if (response.error) {
-                            target.addClass('warning');
+                            if (response.reason === 'shipping_not_available') {
+                                target.addClass('warning');
 
-                            enterAddressMessage.addClass('hidden');
-                            noOptionsMessage.removeClass('hidden');
-                            optionsTable.hide();
+                                enterAddressMessage.addClass('hidden');
+                                noOptionsMessage.removeClass('hidden');
+                                optionsTable.hide();
+                            }
                         } else {
                             var options = '';
 
@@ -69,17 +71,72 @@
                             optionsTable.show();
                         }
                     },
-                    error: function () {
-                        errorContainer
-                            .text('Error getting shipping estimates, please try again.')
-                            .show()
-                        ;
+                    error: function (response) {
+                        if (response.responseJSON.hasOwnProperty('reason')) {
+                            switch (response.responseJSON.reason) {
+                                case 'shipping_calculator_error':
+                                    errorContainer
+                                        .text("We're sorry, there was a temporary error calculating the shipping for your order. Please try again.")
+                                        .removeClass('hidden')
+                                    ;
 
-                        target.removeClass('warning');
+                                    target.addClass('warning');
 
-                        enterAddressMessage.removeClass('hidden');
-                        noOptionsMessage.addClass('hidden');
-                        optionsTable.hide();
+                                    enterAddressMessage.removeClass('hidden');
+                                    noOptionsMessage.addClass('hidden');
+                                    optionsTable.hide();
+
+                                    break;
+
+                                case 'shipping_estimate_cancelled':
+                                    errorContainer
+                                        .text(response.responseJSON.hasOwnProperty('custom_reason') ? response.responseJSON.custom_reason : 'The shipping estimate was cancelled.')
+                                        .removeClass('hidden')
+                                    ;
+
+                                    target.addClass('warning');
+
+                                    enterAddressMessage.removeClass('hidden');
+                                    noOptionsMessage.addClass('hidden');
+                                    optionsTable.hide();
+
+                                    break;
+
+                                case 'shipping_not_supported':
+                                    target.addClass('warning');
+
+                                    enterAddressMessage.addClass('hidden');
+                                    noOptionsMessage.removeClass('hidden');
+                                    optionsTable.hide();
+
+                                    break;
+
+                                default:
+                                    errorContainer
+                                        .text('Error getting shipping estimates, please try again.')
+                                        .show()
+                                    ;
+
+                                    target.removeClass('warning');
+
+                                    enterAddressMessage.removeClass('hidden');
+                                    noOptionsMessage.addClass('hidden');
+                                    optionsTable.hide();
+
+                                    break;
+                            }
+                        } else {
+                            errorContainer
+                                .text('Error getting shipping estimates, please try again.')
+                                .show()
+                            ;
+
+                            target.removeClass('warning');
+
+                            enterAddressMessage.removeClass('hidden');
+                            noOptionsMessage.addClass('hidden');
+                            optionsTable.hide();
+                        }
                     },
                     complete: function () {
                         target.removeClass('loading');

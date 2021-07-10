@@ -12,14 +12,14 @@
             {{ form_row(form.postcode) }}
         </div>
         <div class="column">
-            <div class="ui compact info message visible" id="sylius-shipping-estimator-enter-address">
+            <div class="ui compact info message visible" id="sylius-shipping-estimator-enter-address" {{ sylius_test_html_attribute('enter-address-message') }}>
                 {{ 'babdev_sylius_shipping_estimate.ui.enter_your_address_to_view_shipping_options'|trans }}
             </div>
-            <div class="ui compact message hidden" id="sylius-shipping-estimator-no-shipping-options">
+            <div class="ui compact message hidden" id="sylius-shipping-estimator-no-shipping-options" {{ sylius_test_html_attribute('no-shipping-options-message') }}>
                 <div class="header">{{ 'babdev_sylius_shipping_estimate.ui.shipping_not_available'|trans }}</div>
                 <p>{{ 'babdev_sylius_shipping_estimate.ui.sorry_shipping_is_not_available_to_this_address'|trans }}</p>
             </div>
-            <table class="ui basic table" id="sylius-shipping-estimator-shipping-options" style="display: none">
+            <table class="ui basic table" id="sylius-shipping-estimator-shipping-options" style="display: none" {{ sylius_test_html_attribute('shipping-options') }}>
                 <thead>
                     <tr>
                         <th>{{ 'babdev_sylius_shipping_estimate.ui.method'|trans }}</th>
@@ -30,10 +30,10 @@
             </table>
         </div>
         <div class="sixteen wide column">
-            <button type="submit" class="ui primary fluid icon labeled button" id="place-order"><i class="shipping fast icon"></i> {{ 'babdev_sylius_shipping_estimate.ui.view_estimate'|trans }}</button>
+            <button type="submit" class="ui primary fluid icon labeled button" {{ sylius_test_html_attribute('estimate-shipping') }}><i class="shipping fast icon"></i> {{ 'babdev_sylius_shipping_estimate.ui.view_estimate'|trans }}</button>
         </div>
     </div>
 
     {{ form_end(form, {'render_rest': false}) }}
 </div>
-<div class="ui bottom attached error message hidden" id="sylius-shipping-estimator-error"></div>
+<div class="ui bottom attached error message hidden" id="sylius-shipping-estimator-error" {{ sylius_test_html_attribute('shipping-estimator-error') }}></div>
