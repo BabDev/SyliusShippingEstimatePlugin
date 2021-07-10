@@ -1,106 +1,19 @@
+**NOTE: This plugin is a work-in-progress**
+
 # Sylius Shipping Estimate Plugin
+
+[![Latest Stable Version](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/v)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) [![Latest Unstable Version](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/v/unstable)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) [![Total Downloads](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/downloads)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) [![License](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/license)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) ![Build](https://github.com/BabDev/SyliusShippingEstimatePlugin/workflows/Build/badge.svg?branch=0.1)
 
 The [Sylius](https://sylius.com/) shipping estimate plugin adds support for shipping rate lookups to the site's cart, useful for shops with dynamic shipping rates.
 
 ## Documentation
 
-For a comprehensive guide on Sylius Plugins development please go to Sylius documentation,
-there you will find the <a href="https://docs.sylius.com/en/latest/plugin-development-guide/index.html">Plugin Development Guide</a>, that is full of examples.
+Please see the [BabDev website](https://www.babdev.com/open-source/packages/syliusshippingestimateplugin/docs/1.x) for detailed information on how to use this plugin.
 
-## Quickstart Installation
+## Security
 
-1. Run `composer create-project sylius/plugin-skeleton ProjectName`.
+If you believe you have discovered a security issue with this plugin, please email michael.babker@gmail.com with information about the issue.  Do **NOT** use the public issue tracker for security issues.
 
-2. From the plugin skeleton root directory, run the following commands:
+## License
 
-    ```bash
-    $ (cd tests/Application && yarn install)
-    $ (cd tests/Application && yarn build)
-    $ (cd tests/Application && APP_ENV=test bin/console assets:install public)
-    
-    $ (cd tests/Application && APP_ENV=test bin/console doctrine:database:create)
-    $ (cd tests/Application && APP_ENV=test bin/console doctrine:schema:create)
-    ```
-
-To be able to setup a plugin's database, remember to configure you database credentials in `tests/Application/.env` and `tests/Application/.env.test`.
-
-## Usage
-
-### Running plugin tests
-
-- PHPUnit
-
-  ```bash
-  vendor/bin/phpunit
-  ```
-
-- PHPSpec
-
-  ```bash
-  vendor/bin/phpspec run
-  ```
-
-- Behat (non-JS scenarios)
-
-  ```bash
-  vendor/bin/behat --strict --tags="~@javascript"
-  ```
-
-- Behat (JS scenarios)
-
-    1. [Install Symfony CLI command](https://symfony.com/download).
-
-    2. Start Headless Chrome:
-
-    ```bash
-    google-chrome-stable --enable-automation --disable-background-networking --no-default-browser-check --no-first-run --disable-popup-blocking --disable-default-apps --allow-insecure-localhost --disable-translate --disable-extensions --no-sandbox --enable-features=Metal --headless --remote-debugging-port=9222 --window-size=2880,1800 --proxy-server='direct://' --proxy-bypass-list='*' http://127.0.0.1
-    ```
-
-    3. Install SSL certificates (only once needed) and run test application's webserver on `127.0.0.1:8080`:
-
-    ```bash
-    symfony server:ca:install
-    APP_ENV=test symfony server:start --port=8080 --dir=tests/Application/public --daemon
-    ```
-
-    4. Run Behat:
-
-    ```bash
-    vendor/bin/behat --strict --tags="@javascript"
-    ```
-
-- Static Analysis
-
-    - Psalm
-
-      ```bash
-      vendor/bin/psalm
-      ```
-
-    - PHPStan
-
-      ```bash
-      vendor/bin/phpstan analyse -c phpstan.neon -l max src/  
-      ```
-
-- Coding Standard
-
-  ```bash
-  vendor/bin/ecs check src
-  ```
-
-### Opening Sylius with your plugin
-
-- Using `test` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=test bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=test bin/console server:run -d public)
-    ```
-
-- Using `dev` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=dev bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=dev bin/console server:run -d public)
-    ```
+SyliusShippingEstimatePlugin is licensed under the MIT License. See the [LICENSE file](/LICENSE) for full details.
