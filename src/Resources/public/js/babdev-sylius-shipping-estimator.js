@@ -20,8 +20,8 @@
                 if (countrySelect.val() === '' || postcodeInput.val() === '') {
                     target.removeClass('warning');
 
-                    enterAddressMessage.show();
-                    noOptionsMessage.hide();
+                    enterAddressMessage.removeClass('hidden');
+                    noOptionsMessage.addClass('hidden');
                     optionsTable.hide();
 
                     return;
@@ -35,7 +35,8 @@
                 var errorContainer = $('#sylius-shipping-estimator-error');
 
                 errorContainer
-                    .hide()
+                    .addClass('hidden')
+                    .removeClass('visible')
                     .text('')
                 ;
 
@@ -50,8 +51,8 @@
                         if (response.error) {
                             target.addClass('warning');
 
-                            enterAddressMessage.hide();
-                            noOptionsMessage.show();
+                            enterAddressMessage.addClass('hidden');
+                            noOptionsMessage.removeClass('hidden');
                             optionsTable.hide();
                         } else {
                             var options = '';
@@ -62,9 +63,9 @@
 
                             target.removeClass('warning');
 
+                            enterAddressMessage.addClass('hidden');
+                            noOptionsMessage.addClass('hidden');
                             optionsTable.find('tbody').html(options);
-                            enterAddressMessage.hide();
-                            noOptionsMessage.hide();
                             optionsTable.show();
                         }
                     },
@@ -76,8 +77,8 @@
 
                         target.removeClass('warning');
 
-                        enterAddressMessage.show();
-                        noOptionsMessage.hide();
+                        enterAddressMessage.removeClass('hidden');
+                        noOptionsMessage.addClass('hidden');
                         optionsTable.hide();
                     },
                     complete: function () {

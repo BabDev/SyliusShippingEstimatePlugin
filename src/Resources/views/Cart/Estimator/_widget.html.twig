@@ -12,10 +12,10 @@
             {{ form_row(form.postcode) }}
         </div>
         <div class="column">
-            <div class="ui compact info message" id="sylius-shipping-estimator-enter-address">
+            <div class="ui compact info message visible" id="sylius-shipping-estimator-enter-address">
                 {{ 'babdev_sylius_shipping_estimate.ui.enter_your_address_to_view_shipping_options'|trans }}
             </div>
-            <div class="ui compact warning message" id="sylius-shipping-estimator-no-shipping-options" style="display: none">
+            <div class="ui compact message hidden" id="sylius-shipping-estimator-no-shipping-options">
                 <div class="header">{{ 'babdev_sylius_shipping_estimate.ui.shipping_not_available'|trans }}</div>
                 <p>{{ 'babdev_sylius_shipping_estimate.ui.sorry_shipping_is_not_available_to_this_address'|trans }}</p>
             </div>
@@ -36,4 +36,4 @@
 
     {{ form_end(form, {'render_rest': false}) }}
 </div>
-<div class="ui bottom attached error message" id="sylius-shipping-estimator-error" style="display: none"></div>
+<div class="ui bottom attached error message hidden" id="sylius-shipping-estimator-error"></div>
