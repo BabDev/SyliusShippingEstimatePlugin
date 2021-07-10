@@ -1,0 +1,4 @@
+- [Introduction](/open-source/packages/syliusshippingestimateplugin/docs/1.x/intro)
+- [Installation & Setup](/open-source/packages/syliusshippingestimateplugin/docs/1.x/installation)
+- [Customize the Output](/open-source/packages/syliusshippingestimateplugin/docs/1.x/customize-the-output)
+- [Hooking The Estimator](/open-source/packages/syliusshippingestimateplugin/docs/1.x/hooking-the-estimator)
