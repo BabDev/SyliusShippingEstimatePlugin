@@ -7,6 +7,9 @@
             <argument type="service" id="sylius.resource_controller.request_configuration_factory" />
             <argument type="service" id="sylius.context.cart" />
             <argument type="service" id="sylius.resource_controller.view_handler" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
             <tag name="controller.service_arguments" />
         </service>
 

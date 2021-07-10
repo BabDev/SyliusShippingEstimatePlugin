@@ -18,12 +18,20 @@ final class BabDevSyliusShippingEstimatePlugin extends Bundle
         return 'babdev_sylius_shipping_estimate';
     }
 
+    /**
+     * @psalm-suppress DocblockTypeContradiction
+     * @psalm-suppress InvalidReturnStatement
+     * @psalm-suppress InvalidReturnType
+     */
     public function getContainerExtension(): ?ExtensionInterface
     {
         if (null === $this->containerExtension) {
             $this->containerExtension = new BabDevSyliusShippingEstimateExtension();
         }
 
-        return $this->containerExtension ?? null;
+        /**
+         * @phpstan-ignore-next-line
+         */
+        return $this->containerExtension === false ? null : $this->containerExtension;
     }
 }

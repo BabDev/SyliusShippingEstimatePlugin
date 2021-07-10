@@ -16,19 +16,18 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 final class ShippingEstimatorController extends AbstractController
 {
-    /** @var MetadataInterface */
-    private $metadata;
+    private MetadataInterface $metadata;
 
-    /** @var RequestConfigurationFactoryInterface */
-    private $requestConfigurationFactory;
+    private RequestConfigurationFactoryInterface $requestConfigurationFactory;
 
-    /** @var CartContextInterface */
-    private $cartContext;
+    private CartContextInterface $cartContext;
 
-    /** @var ViewHandlerInterface */
-    private $viewHandler;
+    private ViewHandlerInterface $viewHandler;
 
     public function __construct(
         MetadataInterface $metadata,
@@ -59,6 +58,7 @@ final class ShippingEstimatorController extends AbstractController
             return $this->viewHandler->handle($configuration, View::create($form));
         }
 
+        /** @psalm-suppress MixedArgument */
         return $this->render($configuration->getTemplate('_widget.html'), [
             'cart' => $cart,
             'form' => $form->createView(),
