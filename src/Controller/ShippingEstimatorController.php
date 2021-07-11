@@ -84,7 +84,7 @@ final class ShippingEstimatorController extends AbstractController
      * @psalm-suppress MixedArgument
      * @psalm-suppress PossiblyNullArgument
      */
-    public function estimateShippingAction(Request $request): Response
+    public function estimateShipping(Request $request): Response
     {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
 
@@ -167,7 +167,7 @@ final class ShippingEstimatorController extends AbstractController
         return new JsonResponse(['error' => false, 'options' => $shippingOptions, 'reason' => null]);
     }
 
-    public function renderWidgetAction(Request $request): Response
+    public function renderWidget(Request $request): Response
     {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
 

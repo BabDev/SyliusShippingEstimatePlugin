@@ -1,5 +1,3 @@
-**NOTE: This plugin is a work-in-progress**
-
 # Sylius Shipping Estimate Plugin
 
 [![Latest Stable Version](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/v)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) [![Latest Unstable Version](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/v/unstable)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) [![Total Downloads](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/downloads)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) [![License](https://poser.pugx.org/babdev/sylius-shipping-estimate-plugin/license)](https://packagist.org/packages/babdev/sylius-shipping-estimate-plugin) ![Build](https://github.com/BabDev/SyliusShippingEstimatePlugin/workflows/Build/badge.svg?branch=0.1)
