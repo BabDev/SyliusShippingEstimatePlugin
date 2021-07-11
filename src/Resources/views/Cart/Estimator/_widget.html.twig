@@ -1,6 +1,6 @@
 {% form_theme form '@SyliusShop/Form/theme.html.twig' %}
 
-<div class="ui attached segment" {{ sylius_test_html_attribute('cart-shipping-estimator') }}>
+<div class="ui segment" {{ sylius_test_html_attribute('cart-shipping-estimator') }}>
     <h2 class="ui dividing header">{{ 'babdev_sylius_shipping_estimate.ui.estimate_shipping_costs'|trans }}</h2>
 
     {{ form_start(form, {'attr': {'class': 'ui form', 'novalidate': 'novalidate', 'id': 'sylius-shipping-estimator', 'data-url': path('babdev_sylius_shipping_estimate_shop_ajax_estimate_shipping')}}) }}
@@ -35,5 +35,6 @@
     </div>
 
     {{ form_end(form, {'render_rest': false}) }}
+
+    <div class="ui error message hidden" id="sylius-shipping-estimator-error" {{ sylius_test_html_attribute('shipping-estimator-error') }}></div>
 </div>
-<div class="ui bottom attached error message hidden" id="sylius-shipping-estimator-error" {{ sylius_test_html_attribute('shipping-estimator-error') }}></div>

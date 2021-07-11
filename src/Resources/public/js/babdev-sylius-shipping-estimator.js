@@ -7,18 +7,38 @@
             var enterAddressMessage = $('#sylius-shipping-estimator-enter-address');
             var noOptionsMessage = $('#sylius-shipping-estimator-no-shipping-options');
             var optionsTable = $('#sylius-shipping-estimator-shipping-options');
+            var errorContainer = $('#sylius-shipping-estimator-error');
 
             form.on('submit', function (event) {
                 event.preventDefault();
 
                 var target = $(event.currentTarget);
+                target.removeClass('warning');
+
+                errorContainer.addClass('hidden').text('');
 
                 // Make sure fields are filled in before submitting
                 var countrySelect = $(event.currentTarget).find('select[name$="[country]"]');
                 var postcodeInput = $(event.currentTarget).find('input[name$="[postcode]"]');
 
+                countrySelect.parent().removeClass('error');
+                postcodeInput.parent().removeClass('error');
+
                 if (countrySelect.val() === '' || postcodeInput.val() === '') {
-                    target.removeClass('warning');
+                    target.addClass('warning');
+
+                    if (countrySelect.val() === '') {
+                        countrySelect.parent().addClass('error');
+                    }
+
+                    if (postcodeInput.val() === '') {
+                        postcodeInput.parent().addClass('error');
+                    }
+
+                    errorContainer
+                        .text('Please fill in all fields to estimate your shipping.')
+                        .removeClass('hidden')
+                    ;
 
                     enterAddressMessage.removeClass('hidden');
                     noOptionsMessage.addClass('hidden');
@@ -31,14 +51,6 @@
                     country: countrySelect.val(),
                     postcode: postcodeInput.val()
                 }
-
-                var errorContainer = $('#sylius-shipping-estimator-error');
-
-                errorContainer
-                    .addClass('hidden')
-                    .removeClass('visible')
-                    .text('')
-                ;
 
                 $.ajax({
                     url: target.attr('data-url'),
@@ -114,7 +126,7 @@
                                 default:
                                     errorContainer
                                         .text('Error getting shipping estimates, please try again.')
-                                        .show()
+                                        .removeClass('hidden')
                                     ;
 
                                     target.removeClass('warning');
@@ -128,7 +140,7 @@
                         } else {
                             errorContainer
                                 .text('Error getting shipping estimates, please try again.')
-                                .show()
+                                .removeClass('hidden')
                             ;
 
                             target.removeClass('warning');
