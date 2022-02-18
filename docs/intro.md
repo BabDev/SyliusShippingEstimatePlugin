@@ -11,6 +11,6 @@ The bundle includes:
 
 The below table shows the supported PHP, Symfony, and Sylius versions for this plugin.
 
-| Version | Status             | PHP Versions | Symfony Versions  | Sylius Versions |
-| ------- | ------------------ | ------------ | ----------------- | --------------- |
-| 1.x     | Actively Supported | 7.4+         | 4.4, 5.2-5.4      | 1.9, 1.10       |
+| Version | Status             | PHP Versions | Symfony Versions | Sylius Versions |
+|---------|--------------------|--------------|------------------|-----------------|
+| 1.x     | Actively Supported | 8.0+         | 5.4              | 1.11            |

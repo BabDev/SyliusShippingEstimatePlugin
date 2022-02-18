@@ -8,6 +8,7 @@ use BabDev\SyliusShippingEstimatePlugin\Controller\ShippingEstimatorController;
 use BabDev\SyliusShippingEstimatePlugin\DependencyInjection\BabDevSyliusShippingEstimateExtension;
 use BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 
 final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionTestCase
 {
@@ -22,6 +23,9 @@ final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionT
         $this->assertContainerBuilderHasService('babdev_sylius_shipping_estimate.shop.form.type.shipping_estimator', ShippingEstimatorType::class);
     }
 
+    /**
+     * @return ExtensionInterface[]
+     */
     protected function getContainerExtensions(): array
     {
         return [

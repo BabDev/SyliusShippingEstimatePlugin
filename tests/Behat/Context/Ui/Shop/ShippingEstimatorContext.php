@@ -10,11 +10,8 @@ use Webmozart\Assert\Assert;
 
 final class ShippingEstimatorContext implements Context
 {
-    private SummaryPageInterface $summaryPage;
-
-    public function __construct(SummaryPageInterface $summaryPage)
+    public function __construct(private SummaryPageInterface $summaryPage)
     {
-        $this->summaryPage = $summaryPage;
     }
 
     /**

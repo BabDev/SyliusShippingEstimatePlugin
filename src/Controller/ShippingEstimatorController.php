@@ -36,48 +36,18 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  */
 final class ShippingEstimatorController extends AbstractController
 {
-    private MetadataInterface $metadata;
-
-    private RequestConfigurationFactoryInterface $requestConfigurationFactory;
-
-    private CartContextInterface $cartContext;
-
-    private ViewHandlerInterface $viewHandler;
-
-    private AddressFactoryInterface $addressFactory;
-
-    private AdjustmentFactoryInterface $adjustmentFactory;
-
-    private ShippingMethodsResolverInterface $shippingMethodsResolver;
-
-    private ServiceRegistryInterface $shippingCalculatorRegistry;
-
-    private MoneyFormatterInterface $moneyFormatter;
-
-    private EventDispatcherInterface $eventDispatcher;
-
     public function __construct(
-        MetadataInterface $metadata,
-        RequestConfigurationFactoryInterface $requestConfigurationFactory,
-        CartContextInterface $cartContext,
-        ViewHandlerInterface $viewHandler,
-        AddressFactoryInterface $addressFactory,
-        AdjustmentFactoryInterface $adjustmentFactory,
-        ShippingMethodsResolverInterface $shippingMethodsResolver,
-        ServiceRegistryInterface $shippingCalculatorRegistry,
-        MoneyFormatterInterface $moneyFormatter,
-        EventDispatcherInterface $eventDispatcher
+        private MetadataInterface $metadata,
+        private RequestConfigurationFactoryInterface $requestConfigurationFactory,
+        private CartContextInterface $cartContext,
+        private ViewHandlerInterface $viewHandler,
+        private AddressFactoryInterface $addressFactory,
+        private AdjustmentFactoryInterface $adjustmentFactory,
+        private ShippingMethodsResolverInterface $shippingMethodsResolver,
+        private ServiceRegistryInterface $shippingCalculatorRegistry,
+        private MoneyFormatterInterface $moneyFormatter,
+        private EventDispatcherInterface $eventDispatcher
     ) {
-        $this->metadata = $metadata;
-        $this->requestConfigurationFactory = $requestConfigurationFactory;
-        $this->cartContext = $cartContext;
-        $this->viewHandler = $viewHandler;
-        $this->addressFactory = $addressFactory;
-        $this->adjustmentFactory = $adjustmentFactory;
-        $this->shippingMethodsResolver = $shippingMethodsResolver;
-        $this->shippingCalculatorRegistry = $shippingCalculatorRegistry;
-        $this->moneyFormatter = $moneyFormatter;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -109,7 +79,7 @@ final class ShippingEstimatorController extends AbstractController
         $this->eventDispatcher->dispatch($event);
 
         if ($event->isPropagationStopped()) {
-            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_estimate_cancelled', 'custom_reason' => $event->getCancelReason()], 400);
+            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_estimate_cancelled', 'custom_reason' => $event->getCancelReason()], Response::HTTP_BAD_REQUEST);
         }
 
         $address = $event->getAddress();
@@ -119,7 +89,7 @@ final class ShippingEstimatorController extends AbstractController
         $shipments = $cart->getShipments();
 
         if ($shipments->count() === 0) {
-            throw new HttpException(500, 'A shipment was not created for this order.');
+            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, 'A shipment was not created for this order.');
         }
 
         /** @var ShipmentInterface $shipment */
@@ -127,7 +97,7 @@ final class ShippingEstimatorController extends AbstractController
         $shipment->setOrder($cart);
 
         if (!$this->shippingMethodsResolver->supports($shipment)) {
-            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_supported'], 400);
+            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_supported'], Response::HTTP_BAD_REQUEST);
         }
 
         $shippingOptions = [];
@@ -150,7 +120,7 @@ final class ShippingEstimatorController extends AbstractController
                     'name' => $shippingMethod->getName(),
                     'rate' => $this->moneyFormatter->format($adjustment->getAmount(), $cart->getCurrencyCode()),
                 ];
-            } catch (\Exception $exception) {
+            } catch (\Exception) {
                 // Errored out getting a rate for this calculator, just skip it; we can show the calculator error message if the options list is totally empty
                 $hadError = true;
             }
@@ -158,7 +128,7 @@ final class ShippingEstimatorController extends AbstractController
 
         if ($shippingOptions === []) {
             if ($hadError) {
-                return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_calculator_error'], 500);
+                return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_calculator_error'], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
             return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_available']);
@@ -198,7 +168,7 @@ final class ShippingEstimatorController extends AbstractController
         $formOptions = $configuration->getFormOptions();
 
         /** @var FormFactoryInterface $formFactory */
-        $formFactory = $this->get('form.factory');
+        $formFactory = $this->container->get('form.factory');
 
         if ($configuration->isHtmlRequest()) {
             return $formFactory->create($formType, null, $formOptions);

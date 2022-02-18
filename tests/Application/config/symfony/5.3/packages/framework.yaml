@@ -1,9 +1,0 @@
-framework:
-    session:
-        handler_id: null
-        storage_factory_id: session.storage.factory.native
-
-when@test:
-    framework:
-        session:
-            storage_factory_id: session.storage.factory.mock_file

@@ -10,16 +10,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 final class BeforeEstimateShippingEvent extends Event
 {
-    private OrderInterface $cart;
-
-    private AddressInterface $address;
-
     private ?string $cancelReason = null;
 
-    public function __construct(OrderInterface $cart, AddressInterface $address)
+    public function __construct(private OrderInterface $cart, private AddressInterface $address)
     {
-        $this->cart = $cart;
-        $this->address = $address;
     }
 
     public function getCart(): OrderInterface

@@ -20,4 +20,4 @@ default:
                 - babdev_sylius_shipping_estimate.behat.context.ui.shop.shipping_estimator
 
             filters:
-                tags: "@shipping_estimator && @ui"
+                tags: "@shipping_estimator&&@ui"

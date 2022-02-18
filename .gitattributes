@@ -9,6 +9,7 @@
 .gitattributes export-ignore
 .gitignore export-ignore
 behat.yml.dist export-ignore
+CHANGELOG.md export-ignore
 ecs.php export-ignore
 phpspec.yml.dist export-ignore
 phpstan.neon export-ignore
