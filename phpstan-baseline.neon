@@ -1,7 +1,22 @@
 parameters:
 	ignoreErrors:
 		-
+			message: "#^Parameter \\#1 \\$countryCode of method Sylius\\\\Component\\\\Addressing\\\\Model\\\\AddressInterface\\:\\:setCountryCode\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 1
+			path: src/Controller/ShippingEstimatorController.php
+
+		-
 			message: "#^Parameter \\#1 \\$identifier of method Sylius\\\\Component\\\\Registry\\\\ServiceRegistryInterface\\:\\:get\\(\\) expects string, string\\|null given\\.$#"
+			count: 1
+			path: src/Controller/ShippingEstimatorController.php
+
+		-
+			message: "#^Parameter \\#1 \\$postcode of method Sylius\\\\Component\\\\Addressing\\\\Model\\\\AddressInterface\\:\\:setPostcode\\(\\) expects string\\|null, mixed given\\.$#"
+			count: 1
+			path: src/Controller/ShippingEstimatorController.php
+
+		-
+			message: "#^Parameter \\#1 \\$view of method Symfony\\\\Bundle\\\\FrameworkBundle\\\\Controller\\\\AbstractController\\:\\:render\\(\\) expects string, mixed given\\.$#"
 			count: 1
 			path: src/Controller/ShippingEstimatorController.php
 
