@@ -43,7 +43,7 @@ final class ShippingEstimatorController extends AbstractController
         private ShippingMethodsResolverInterface $shippingMethodsResolver,
         private ServiceRegistryInterface $shippingCalculatorRegistry,
         private MoneyFormatterInterface $moneyFormatter,
-        private EventDispatcherInterface $eventDispatcher
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -106,7 +106,7 @@ final class ShippingEstimatorController extends AbstractController
                 $adjustment = $this->adjustmentFactory->createWithData(
                     AdjustmentInterface::SHIPPING_ADJUSTMENT,
                     $shippingMethod->getName(),
-                    $calculator->calculate($shipment, $shippingMethod->getConfiguration())
+                    $calculator->calculate($shipment, $shippingMethod->getConfiguration()),
                 );
 
                 $shippingOptions[] = [
