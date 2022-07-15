@@ -33,7 +33,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When I choose :countryName as my country
      */
-    public function iChooseAsMyCountry($countryName)
+    public function iChooseAsMyCountry($countryName): void
     {
         $this->summaryPage->selectCountry($countryName);
     }
@@ -41,7 +41,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When I specify :postcode as my postcode
      */
-    public function iSpecifyAsMyPostcode($postcode)
+    public function iSpecifyAsMyPostcode($postcode): void
     {
         $this->summaryPage->specifyPostcode($postcode);
     }
@@ -49,7 +49,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When I click the estimate shipping button
      */
-    public function iClickTheEstimateShippingButton()
+    public function iClickTheEstimateShippingButton(): void
     {
         $this->summaryPage->clickEstimateShippingButton();
     }
@@ -57,7 +57,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When the enter address message is visible
      */
-    public function theEnterAddressMessageIsVisible()
+    public function theEnterAddressMessageIsVisible(): void
     {
         $this->summaryPage->hasAddressMessage();
     }
@@ -65,7 +65,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When the enter address message is not visible
      */
-    public function theEnterAddressMessageIsNotVisible()
+    public function theEnterAddressMessageIsNotVisible(): void
     {
         $this->summaryPage->doesNotHaveAddressMessage();
     }
@@ -73,7 +73,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When the no shipping options message is visible
      */
-    public function theNoShippingOptionsMessageIsVisible()
+    public function theNoShippingOptionsMessageIsVisible(): void
     {
         $this->summaryPage->hasAddressMessage();
     }
@@ -81,7 +81,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When the no shipping options message is not visible
      */
-    public function theNoShippingOptionsMessageIsNotVisible()
+    public function theNoShippingOptionsMessageIsNotVisible(): void
     {
         $this->summaryPage->doesNotHaveAddressMessage();
     }
@@ -89,7 +89,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When I see :count shipping options available
      */
-    public function iSeeShippingOptions($count)
+    public function iSeeShippingOptions($count): void
     {
         $this->summaryPage->seeShippingOptions((int) $count);
     }

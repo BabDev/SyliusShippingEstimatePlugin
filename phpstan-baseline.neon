@@ -30,3 +30,18 @@ parameters:
 			count: 1
 			path: src/Controller/ShippingEstimatorController.php
 
+		-
+			message: "#^Method Tests\\\\BabDev\\\\SyliusShippingEstimatePlugin\\\\Behat\\\\Context\\\\Ui\\\\Shop\\\\ShippingEstimatorContext\\:\\:iChooseAsMyCountry\\(\\) has parameter \\$countryName with no type specified\\.$#"
+			count: 1
+			path: tests/Behat/Context/Ui/Shop/ShippingEstimatorContext.php
+
+		-
+			message: "#^Method Tests\\\\BabDev\\\\SyliusShippingEstimatePlugin\\\\Behat\\\\Context\\\\Ui\\\\Shop\\\\ShippingEstimatorContext\\:\\:iSeeShippingOptions\\(\\) has parameter \\$count with no type specified\\.$#"
+			count: 1
+			path: tests/Behat/Context/Ui/Shop/ShippingEstimatorContext.php
+
+		-
+			message: "#^Method Tests\\\\BabDev\\\\SyliusShippingEstimatePlugin\\\\Behat\\\\Context\\\\Ui\\\\Shop\\\\ShippingEstimatorContext\\:\\:iSpecifyAsMyPostcode\\(\\) has parameter \\$postcode with no type specified\\.$#"
+			count: 1
+			path: tests/Behat/Context/Ui/Shop/ShippingEstimatorContext.php
+

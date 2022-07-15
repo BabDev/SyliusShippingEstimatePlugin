@@ -1,8 +1,13 @@
 includes:
   - phpstan-baseline.neon
+
 parameters:
+    level: max
     reportUnmatchedIgnoredErrors: false
     checkMissingIterableValueType: false
+    paths:
+        - src
+        - tests/Behat
 
     excludePaths:
         # Makes PHPStan crash
@@ -11,6 +16,3 @@ parameters:
         # Test dependencies
         - 'tests/Application/app/**.php'
         - 'tests/Application/src/**.php'
-
-    ignoreErrors:
-        - '/Parameter #1 \$configuration of method Symfony\\Component\\DependencyInjection\\Extension\\Extension::processConfiguration\(\) expects Symfony\\Component\\Config\\Definition\\ConfigurationInterface, Symfony\\Component\\Config\\Definition\\ConfigurationInterface\|null given\./'

@@ -31,9 +31,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-/**
- * @psalm-suppress PropertyNotSetInConstructor
- */
 final class ShippingEstimatorController extends AbstractController
 {
     public function __construct(
@@ -50,10 +47,6 @@ final class ShippingEstimatorController extends AbstractController
     ) {
     }
 
-    /**
-     * @psalm-suppress MixedArgument
-     * @psalm-suppress PossiblyNullArgument
-     */
     public function estimateShipping(Request $request): Response
     {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
@@ -149,7 +142,6 @@ final class ShippingEstimatorController extends AbstractController
 
         $cart = $this->cartContext->getCart();
 
-        /** @psalm-suppress MixedArgument */
         return $this->render($configuration->getTemplate('_widget.html'), [
             'cart' => $cart,
             'form' => $form->createView(),
