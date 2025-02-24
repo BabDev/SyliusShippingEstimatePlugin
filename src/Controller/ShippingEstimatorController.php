@@ -18,9 +18,8 @@ use Sylius\Component\Core\Model\ShipmentInterface;
 use Sylius\Component\Core\Model\ShippingMethodInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Sylius\Component\Order\Factory\AdjustmentFactoryInterface;
-use Sylius\Component\Registry\ServiceRegistryInterface;
 use Sylius\Component\Resource\Metadata\MetadataInterface;
-use Sylius\Component\Shipping\Calculator\CalculatorInterface;
+use Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface;
 use Sylius\Component\Shipping\Resolver\ShippingMethodsResolverInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -41,7 +40,7 @@ final class ShippingEstimatorController extends AbstractController
         private AddressFactoryInterface $addressFactory,
         private AdjustmentFactoryInterface $adjustmentFactory,
         private ShippingMethodsResolverInterface $shippingMethodsResolver,
-        private ServiceRegistryInterface $shippingCalculatorRegistry,
+        private DelegatingCalculatorInterface $shippingCalculator,
         private MoneyFormatterInterface $moneyFormatter,
         private EventDispatcherInterface $eventDispatcher,
     ) {
@@ -99,14 +98,11 @@ final class ShippingEstimatorController extends AbstractController
         /** @var ShippingMethodInterface $shippingMethod */
         foreach ($this->shippingMethodsResolver->getSupportedMethods($shipment) as $shippingMethod) {
             try {
-                /** @var CalculatorInterface $calculator */
-                $calculator = $this->shippingCalculatorRegistry->get($shippingMethod->getCalculator());
-
                 /** @var AdjustmentInterface $adjustment */
                 $adjustment = $this->adjustmentFactory->createWithData(
                     AdjustmentInterface::SHIPPING_ADJUSTMENT,
                     $shippingMethod->getName(),
-                    $calculator->calculate($shipment, $shippingMethod->getConfiguration()),
+                    $this->shippingCalculator->calculate($shipment),
                 );
 
                 $shippingOptions[] = [

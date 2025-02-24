@@ -6,6 +6,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use BabDev\SyliusShippingEstimatePlugin\Controller\ShippingEstimatorController;
 use BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType;
+use Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -19,7 +20,7 @@ return static function (ContainerConfigurator $container): void {
             service('sylius.factory.address'),
             service('sylius.factory.adjustment'),
             service('sylius.shipping_methods_resolver'),
-            service('sylius.registry.shipping_calculator'),
+            service(DelegatingCalculatorInterface::class),
             service('sylius.money_formatter'),
             service('event_dispatcher'),
         ])

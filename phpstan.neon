@@ -4,7 +4,10 @@ includes:
 parameters:
     level: max
     reportUnmatchedIgnoredErrors: false
-    checkMissingIterableValueType: false
+    ignoreErrors:
+        -
+            identifier: missingType.iterableValue
+
     paths:
         - src
         - tests/Behat
