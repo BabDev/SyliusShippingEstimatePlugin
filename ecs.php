@@ -1,15 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 use PhpCsFixer\Fixer\ClassNotation\VisibilityRequiredFixer;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symplify\EasyCodingStandard\ValueObject\Option;
+use SlevomatCodingStandard\Sniffs\Commenting\InlineDocCommentDeclarationSniff;
+use Symplify\EasyCodingStandard\Config\ECSConfig;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $containerConfigurator->import('vendor/sylius-labs/coding-standard/ecs.php');
+return static function (ECSConfig $ecsConfig): void {
+    $ecsConfig->paths([
+        __DIR__ . '/spec',
+        __DIR__ . '/src',
+        __DIR__ . '/tests/Behat',
+        __DIR__ . '/tests/Functional',
+        __DIR__ . '/ecs.php',
+    ]);
 
-    $parameters = $containerConfigurator->parameters();
-    $parameters->set(Option::PATHS, [__DIR__ . '/src']);
-    $parameters->set(Option::SKIP, [
+    $ecsConfig->import('vendor/sylius-labs/coding-standard/ecs.php');
+
+    $ecsConfig->skip([
+        InlineDocCommentDeclarationSniff::class . '.MissingVariable',
         VisibilityRequiredFixer::class => ['*Spec.php'],
     ]);
 };
