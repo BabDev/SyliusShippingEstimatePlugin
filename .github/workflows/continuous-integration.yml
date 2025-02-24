@@ -14,7 +14,7 @@ on:
 
 jobs:
     behat:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         name: "Behat - Sylius ${{ matrix.sylius }}, PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}, MySQL ${{ matrix.mysql }}"
 
@@ -33,7 +33,7 @@ jobs:
 
         steps:
             -
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
 
             -
                 name: Setup PHP
@@ -46,7 +46,7 @@ jobs:
 
             -
                 name: Setup Node
-                uses: actions/setup-node@v3
+                uses: actions/setup-node@v4
                 with:
                     node-version: "${{ matrix.node }}"
                     cache: "yarn"
@@ -88,7 +88,7 @@ jobs:
 
             -
                 name: Cache Composer
-                uses: actions/cache@v3
+                uses: actions/cache@v4
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
                     key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
@@ -150,13 +150,13 @@ jobs:
                     if-no-files-found: ignore
 
     composer:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         name: "Validate Composer Schema"
 
         steps:
             -
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
 
             -
                 name: Setup PHP
@@ -172,7 +172,7 @@ jobs:
                 run: composer validate --ansi --strict
 
     phpspec:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         name: "PHPSpec - Sylius ${{ matrix.sylius }}, PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}"
 
@@ -185,7 +185,7 @@ jobs:
 
         steps:
             -
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
 
             -
                 name: Setup PHP
@@ -203,7 +203,7 @@ jobs:
 
             -
                 name: Cache Composer
-                uses: actions/cache@v3
+                uses: actions/cache@v4
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
                     key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
@@ -226,7 +226,7 @@ jobs:
                 run: vendor/bin/phpspec run --ansi -f progress --no-interaction
 
     phpunit:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         name: "PHPUnit - Sylius ${{ matrix.sylius }}, PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}"
 
@@ -239,7 +239,7 @@ jobs:
 
         steps:
             -
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
 
             -
                 name: Setup PHP
@@ -257,7 +257,7 @@ jobs:
 
             -
                 name: Cache Composer
-                uses: actions/cache@v3
+                uses: actions/cache@v4
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
                     key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}

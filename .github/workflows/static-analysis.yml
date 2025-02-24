@@ -14,13 +14,13 @@ on:
 
 jobs:
     sa-phpstan:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         name: PHPStan
 
         steps:
             -
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
 
             -
                 name: Setup PHP
@@ -38,7 +38,7 @@ jobs:
 
             -
                 name: Cache Composer
-                uses: actions/cache@v3
+                uses: actions/cache@v4
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
                     key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
@@ -56,13 +56,13 @@ jobs:
                 run: vendor/bin/phpstan analyse --error-format=github
 
     sa-psalm:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
 
         name: Psalm
 
         steps:
             -
-                uses: actions/checkout@v3
+                uses: actions/checkout@v4
 
             -
                 name: Setup PHP
@@ -80,7 +80,7 @@ jobs:
 
             -
                 name: Cache Composer
-                uses: actions/cache@v3
+                uses: actions/cache@v4
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
                     key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
