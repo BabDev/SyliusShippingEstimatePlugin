@@ -16,56 +16,44 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
 
     public function doesNotHaveAddressMessage(): bool
     {
-        $message = $this->getElement('enter_address_message');
-
-        return $message->hasClass('hidden');
+        return $this->getElement('enter_address_message')->hasClass('hidden');
     }
 
     public function hasAddressMessage(): bool
     {
-        $message = $this->getElement('enter_address_message');
-
-        return !$message->hasClass('hidden');
+        return !$this->getElement('enter_address_message')->hasClass('hidden');
     }
 
     public function doesNotHaveNoShippingOptionsMessage(): bool
     {
-        $message = $this->getElement('no_shipping_options_message');
-
-        return $message->hasClass('hidden');
+        return $this->getElement('no_shipping_options_message')->hasClass('hidden');
     }
 
     public function hasNoShippingOptionsMessage(): bool
     {
-        $message = $this->getElement('no_shipping_options_message');
-
-        return !$message->hasClass('hidden');
+        return !$this->getElement('no_shipping_options_message')->hasClass('hidden');
     }
 
     public function seeShippingOptions(int $count): bool
     {
-        $table = $this->getElement('shipping_options_table');
-        $options = $table->findAll('css', 'tbody tr');
+        $options = $this->getElement('shipping_options_table')->findAll('css', 'tbody tr');
 
         return count($options) === $count;
     }
 
     public function selectCountry(string $value): void
     {
-        $country = $this->getElement('shipping_estimator_country');
-        $country->selectOption($value);
+        $this->getElement('shipping_estimator_country')->selectOption($value);
     }
 
     public function specifyPostcode(string $value): void
     {
-        $postcode = $this->getElement('shipping_estimator_postcode');
-        $postcode->setValue($value);
+        $this->getElement('shipping_estimator_postcode')->setValue($value);
     }
 
     public function clickEstimateShippingButton(): void
     {
-        $button = $this->getElement('estimate_shipping_button');
-        $button->click();
+        $this->getElement('estimate_shipping_button')->click();
 
         JQueryHelper::waitForFormToStopLoading($this->getDocument());
     }

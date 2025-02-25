@@ -33,7 +33,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When I choose :countryName as my country
      */
-    public function iChooseAsMyCountry($countryName): void
+    public function iChooseAsMyCountry(string $countryName): void
     {
         $this->summaryPage->selectCountry($countryName);
     }
@@ -41,7 +41,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When I specify :postcode as my postcode
      */
-    public function iSpecifyAsMyPostcode($postcode): void
+    public function iSpecifyAsMyPostcode(string $postcode): void
     {
         $this->summaryPage->specifyPostcode($postcode);
     }
@@ -89,8 +89,8 @@ final class ShippingEstimatorContext implements Context
     /**
      * @When I see :count shipping options available
      */
-    public function iSeeShippingOptions($count): void
+    public function iSeeShippingOptions(int $count): void
     {
-        $this->summaryPage->seeShippingOptions((int) $count);
+        $this->summaryPage->seeShippingOptions($count);
     }
 }
