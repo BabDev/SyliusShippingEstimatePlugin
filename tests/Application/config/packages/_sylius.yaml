@@ -9,6 +9,10 @@ imports:
 
     - { resource: "@BabDevSyliusShippingEstimatePlugin/Resources/config/app/config.yml" }
 
+babdev_sylius_shipping_estimate:
+    rate_limiter:
+        limit: 10000
+
 parameters:
     sylius_core.public_dir: '%kernel.project_dir%/public'
 

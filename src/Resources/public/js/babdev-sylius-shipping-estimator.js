@@ -6,7 +6,8 @@
         incompleteForm: 'Please fill in all fields to estimate your shipping.',
         calculatorError: "We're sorry, there was a temporary error calculating the shipping for your order. Please try again.",
         estimateCancelled: 'The shipping estimate was cancelled.',
-        genericError: 'Error getting shipping estimates, please try again.'
+        genericError: 'Error getting shipping estimates, please try again.',
+        rateLimited: 'You have requested too many shipping estimates. Please wait a moment and try again.'
     };
 
     $.fn.extend({
@@ -126,6 +127,12 @@
                         form.addClass('warning');
 
                         switch (payload.reason) {
+                            case 'shipping_estimate_rate_limited':
+                                showError(message('rateLimited'));
+                                showEnterAddress();
+
+                                break;
+
                             case 'shipping_calculator_error':
                                 showError(message('calculatorError'));
                                 showEnterAddress();

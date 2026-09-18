@@ -24,6 +24,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment;
 
@@ -41,10 +42,26 @@ final class ShippingEstimatorController
         private DelegatingCalculatorInterface $shippingCalculator,
         private MoneyFormatterInterface $moneyFormatter,
         private EventDispatcherInterface $eventDispatcher,
+        private ?RateLimiterFactory $rateLimiterFactory = null,
     ) {
     }
 
     public function estimateShipping(Request $request): Response
+    {
+        $response = $this->enforceRateLimit($request) ?? $this->doEstimateShipping($request);
+
+        /*
+         * An estimate is specific to one customer's cart and the address they typed, and it is
+         * served over GET, so make sure nothing between the shop and the browser keeps a copy of
+         * one customer's rates to hand to the next.
+         */
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-store');
+
+        return $response;
+    }
+
+    private function doEstimateShipping(Request $request): Response
     {
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
 
@@ -170,6 +187,37 @@ final class ShippingEstimatorController
             'cart' => $cart,
             'form' => $form->createView(),
         ]));
+    }
+
+    /**
+     * Applies the configured rate limit to the requesting client.
+     *
+     * Returns the response to send when the client has no requests left, or null to carry on. The
+     * endpoint is unauthenticated and a shipping calculator may call an external carrier API on
+     * every request, so the limit is keyed on the client address.
+     */
+    private function enforceRateLimit(Request $request): ?Response
+    {
+        if (null === $this->rateLimiterFactory) {
+            return null;
+        }
+
+        $limit = $this->rateLimiterFactory->create($request->getClientIp())->consume();
+
+        if ($limit->isAccepted()) {
+            return null;
+        }
+
+        $response = new JsonResponse(
+            ['error' => true, 'options' => [], 'reason' => 'shipping_estimate_rate_limited'],
+            Response::HTTP_TOO_MANY_REQUESTS,
+        );
+
+        $response->headers->set('Retry-After', (string) ($limit->getRetryAfter()->getTimestamp() - time()));
+        $response->headers->set('X-RateLimit-Limit', (string) $limit->getLimit());
+        $response->headers->set('X-RateLimit-Remaining', (string) $limit->getRemainingTokens());
+
+        return $response;
     }
 
     /**

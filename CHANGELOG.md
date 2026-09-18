@@ -13,6 +13,8 @@
 - Handle error responses that carry no JSON body instead of failing silently
 - Answer `shipping_not_supported` with a 200 response, matching `shipping_not_available`; both mean the estimate ran and found no rates
 - Decouple the controller from `Symfony\Bundle\FrameworkBundle\Controller\AbstractController`
+- Add optional rate limiting to the shipping estimate endpoint, enabled by default when `symfony/rate-limiter` is installed and configurable under the new `babdev_sylius_shipping_estimate` configuration key
+- Send estimate responses with `Cache-Control: no-store, private` so shared caches cannot serve one customer's rates to another
 
 ## 0.2.0 (2022-07-15)
 

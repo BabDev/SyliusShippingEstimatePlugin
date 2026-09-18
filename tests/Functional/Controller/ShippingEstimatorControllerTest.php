@@ -41,6 +41,8 @@ use Symfony\Component\Form\PreloadedExtension;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Twig\Environment;
 
@@ -299,6 +301,91 @@ final class ShippingEstimatorControllerTest extends TestCase
         self::assertNull($cart->getShippingAddress());
     }
 
+    /**
+     * @test
+     */
+    public function it_marks_estimate_responses_as_uncacheable(): void
+    {
+        /** @var Stub&OrderInterface $cart */
+        $cart = $this->createStub(OrderInterface::class);
+        $cart->method('getShipments')->willReturn(new ArrayCollection());
+
+        /** @var MockObject&ViewHandlerInterface $viewHandler */
+        $viewHandler = $this->createMock(ViewHandlerInterface::class);
+
+        $response = $this->createController($viewHandler, new EventDispatcher(), $cart)
+            ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
+        ;
+
+        $cacheControl = (string) $response->headers->get('Cache-Control');
+
+        // One customer's rates must never be served to another from a shared cache.
+        self::assertStringContainsString('no-store', $cacheControl);
+        self::assertStringContainsString('private', $cacheControl);
+    }
+
+    /**
+     * @test
+     */
+    public function it_refuses_an_estimate_once_the_client_has_used_up_its_allowance(): void
+    {
+        // A real limiter rather than a stub, so the allowance is genuinely consumed and exhausted.
+        $limiterFactory = new RateLimiterFactory(
+            ['id' => 'test', 'policy' => 'fixed_window', 'limit' => 1, 'interval' => '1 minute'],
+            new InMemoryStorage(),
+        );
+
+        /** @var Stub&OrderInterface $cart */
+        $cart = $this->createStub(OrderInterface::class);
+        $cart->method('getShipments')->willReturn(new ArrayCollection());
+
+        /** @var MockObject&ViewHandlerInterface $viewHandler */
+        $viewHandler = $this->createMock(ViewHandlerInterface::class);
+
+        $controller = $this->createController(
+            $viewHandler,
+            new EventDispatcher(),
+            $cart,
+            null,
+            null,
+            $limiterFactory,
+        );
+
+        $request = $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']);
+
+        $allowed = $controller->estimateShipping($request);
+        self::assertSame(Response::HTTP_OK, $allowed->getStatusCode());
+
+        $refused = $controller->estimateShipping($request);
+
+        self::assertSame(Response::HTTP_TOO_MANY_REQUESTS, $refused->getStatusCode());
+        self::assertStringContainsString('shipping_estimate_rate_limited', (string) $refused->getContent());
+        self::assertTrue($refused->headers->has('Retry-After'));
+        self::assertSame('1', $refused->headers->get('X-RateLimit-Limit'));
+        self::assertStringContainsString('no-store', (string) $refused->headers->get('Cache-Control'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_does_not_limit_anything_without_a_limiter(): void
+    {
+        /** @var Stub&OrderInterface $cart */
+        $cart = $this->createStub(OrderInterface::class);
+        $cart->method('getShipments')->willReturn(new ArrayCollection());
+
+        /** @var MockObject&ViewHandlerInterface $viewHandler */
+        $viewHandler = $this->createMock(ViewHandlerInterface::class);
+
+        $controller = $this->createController($viewHandler, new EventDispatcher(), $cart);
+
+        $request = $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']);
+
+        for ($i = 0; $i < 5; ++$i) {
+            self::assertSame(Response::HTTP_OK, $controller->estimateShipping($request)->getStatusCode());
+        }
+    }
+
     private function createShippingMethod(string $code): ShippingMethodInterface
     {
         /** @var Stub&ShippingMethodInterface $method */
@@ -315,6 +402,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         ?OrderInterface $cart = null,
         ?ShippingMethodsResolverInterface $shippingMethodsResolver = null,
         ?DelegatingCalculatorInterface $shippingCalculator = null,
+        ?RateLimiterFactory $rateLimiterFactory = null,
     ): ShippingEstimatorController {
         /** @var Stub&MetadataInterface $metadata */
         $metadata = $this->createStub(MetadataInterface::class);
@@ -352,6 +440,7 @@ final class ShippingEstimatorControllerTest extends TestCase
             $shippingCalculator ?? $this->createMock(DelegatingCalculatorInterface::class),
             $this->createMoneyFormatter(),
             $eventDispatcher,
+            $rateLimiterFactory,
         );
 
         return $controller;
