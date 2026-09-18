@@ -34,11 +34,9 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
         return !$this->getElement('no_shipping_options_message')->hasClass('hidden');
     }
 
-    public function seeShippingOptions(int $count): bool
+    public function countShippingOptions(): int
     {
-        $options = $this->getElement('shipping_options_table')->findAll('css', 'tbody tr');
-
-        return count($options) === $count;
+        return count($this->getElement('shipping_options_table')->findAll('css', 'tbody tr'));
     }
 
     public function selectCountry(string $value): void
@@ -55,7 +53,16 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
     {
         $this->getElement('estimate_shipping_button')->click();
 
-        JQueryHelper::waitForFormToStopLoading($this->getDocument());
+        $form = $this->getElement('shipping_estimator_form');
+
+        /*
+         * `JQueryHelper::waitForFormToStopLoading()` waits on the first form in the document, which
+         * on the cart summary is the cart itself and never carries the loading class, so it returns
+         * before the estimate request has started and leaves the assertions racing the response.
+         * Wait for the estimator's own request to start and then finish instead.
+         */
+        $this->getDocument()->waitFor(5, static fn (): bool => $form->hasClass('loading'));
+        $this->getDocument()->waitFor(10, static fn (): bool => !$form->hasClass('loading'));
     }
 
     protected function getDefinedElements(): array

@@ -27,7 +27,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final class ShippingEstimatorController extends AbstractController
@@ -81,7 +80,7 @@ final class ShippingEstimatorController extends AbstractController
         $shipments = $cart->getShipments();
 
         if ($shipments->count() === 0) {
-            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, 'A shipment was not created for this order.');
+            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_available']);
         }
 
         /** @var ShipmentInterface $shipment */

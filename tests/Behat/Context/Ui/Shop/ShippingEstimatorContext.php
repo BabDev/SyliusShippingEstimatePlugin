@@ -59,7 +59,7 @@ final class ShippingEstimatorContext implements Context
      */
     public function theEnterAddressMessageIsVisible(): void
     {
-        $this->summaryPage->hasAddressMessage();
+        Assert::true($this->summaryPage->hasAddressMessage(), 'The enter address message is not visible.');
     }
 
     /**
@@ -67,7 +67,7 @@ final class ShippingEstimatorContext implements Context
      */
     public function theEnterAddressMessageIsNotVisible(): void
     {
-        $this->summaryPage->doesNotHaveAddressMessage();
+        Assert::true($this->summaryPage->doesNotHaveAddressMessage(), 'The enter address message is visible.');
     }
 
     /**
@@ -75,7 +75,7 @@ final class ShippingEstimatorContext implements Context
      */
     public function theNoShippingOptionsMessageIsVisible(): void
     {
-        $this->summaryPage->hasAddressMessage();
+        Assert::true($this->summaryPage->hasNoShippingOptionsMessage(), 'The no shipping options message is not visible.');
     }
 
     /**
@@ -83,7 +83,7 @@ final class ShippingEstimatorContext implements Context
      */
     public function theNoShippingOptionsMessageIsNotVisible(): void
     {
-        $this->summaryPage->doesNotHaveAddressMessage();
+        Assert::true($this->summaryPage->doesNotHaveNoShippingOptionsMessage(), 'The no shipping options message is visible.');
     }
 
     /**
@@ -91,6 +91,6 @@ final class ShippingEstimatorContext implements Context
      */
     public function iSeeShippingOptions(int $count): void
     {
-        $this->summaryPage->seeShippingOptions($count);
+        Assert::same($this->summaryPage->countShippingOptions(), $count);
     }
 }

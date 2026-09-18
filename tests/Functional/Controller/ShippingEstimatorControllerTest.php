@@ -7,6 +7,7 @@ namespace Tests\BabDev\SyliusShippingEstimatePlugin\Functional\Controller;
 use BabDev\SyliusShippingEstimatePlugin\Controller\ShippingEstimatorController;
 use BabDev\SyliusShippingEstimatePlugin\Event\BeforeEstimateShippingEvent;
 use BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType;
+use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -108,9 +109,38 @@ final class ShippingEstimatorControllerTest extends TestCase
         );
     }
 
+    /**
+     * @test
+     */
+    public function it_reports_shipping_as_unavailable_for_a_cart_without_a_shipment(): void
+    {
+        /** @var Stub&OrderInterface $cart */
+        $cart = $this->createStub(OrderInterface::class);
+        $cart->method('getShipments')->willReturn(new ArrayCollection());
+
+        /** @var MockObject&ViewHandlerInterface $viewHandler */
+        $viewHandler = $this->createMock(ViewHandlerInterface::class);
+        $viewHandler->expects(self::never())->method('handle');
+
+        $response = $this->createController($viewHandler, new EventDispatcher(), $cart)->estimateShipping(
+            $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']),
+        );
+
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'error' => true,
+                'options' => [],
+                'reason' => 'shipping_not_available',
+            ], \JSON_THROW_ON_ERROR),
+            (string) $response->getContent(),
+        );
+    }
+
     private function createController(
         ViewHandlerInterface $viewHandler,
         EventDispatcher $eventDispatcher,
+        ?OrderInterface $cart = null,
     ): ShippingEstimatorController {
         /** @var Stub&MetadataInterface $metadata */
         $metadata = $this->createStub(MetadataInterface::class);
@@ -134,7 +164,7 @@ final class ShippingEstimatorControllerTest extends TestCase
 
         /** @var Stub&CartContextInterface $cartContext */
         $cartContext = $this->createStub(CartContextInterface::class);
-        $cartContext->method('getCart')->willReturn($this->createStub(OrderInterface::class));
+        $cartContext->method('getCart')->willReturn($cart ?? $this->createStub(OrderInterface::class));
 
         $controller = new ShippingEstimatorController(
             $metadata,

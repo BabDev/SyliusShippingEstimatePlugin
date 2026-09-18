@@ -18,7 +18,7 @@ interface SummaryPageInterface extends BaseSummaryPageInterface
 
     public function hasNoShippingOptionsMessage(): bool;
 
-    public function seeShippingOptions(int $count): bool;
+    public function countShippingOptions(): int;
 
     public function selectCountry(string $value): void;
 
