@@ -16,14 +16,14 @@ return static function (ContainerConfigurator $container): void {
             service('sylius.resource_controller.request_configuration_factory'),
             service('sylius.context.cart'),
             service('sylius.resource_controller.view_handler'),
+            service('form.factory'),
+            service('twig'),
             service('sylius.factory.address'),
-            service('sylius.factory.adjustment'),
             service('sylius.shipping_methods_resolver'),
             service('sylius.shipping_calculator'),
             service('sylius.money_formatter'),
             service('event_dispatcher'),
         ])
-        ->call('setContainer', [service('service_container')])
         ->tag('controller.service_arguments')
     ;
 

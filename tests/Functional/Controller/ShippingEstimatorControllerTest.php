@@ -27,14 +27,11 @@ use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\Shipment;
 use Sylius\Component\Core\Model\ShippingMethodInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
-use Sylius\Component\Order\Factory\AdjustmentFactoryInterface;
-use Sylius\Component\Order\Model\Adjustment;
 use Sylius\Component\Resource\Metadata\MetadataInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface;
 use Sylius\Component\Shipping\Model\ShipmentInterface;
 use Sylius\Component\Shipping\Resolver\ShippingMethodsResolverInterface;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
@@ -45,6 +42,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Twig\Environment;
 
 final class ShippingEstimatorControllerTest extends TestCase
 {
@@ -212,24 +210,6 @@ final class ShippingEstimatorControllerTest extends TestCase
         self::assertSame($original, $shipment->getMethod(), 'The shipment should keep the method it arrived with.');
     }
 
-    private function createAdjustmentFactory(): AdjustmentFactoryInterface
-    {
-        /** @var Stub&AdjustmentFactoryInterface $adjustmentFactory */
-        $adjustmentFactory = $this->createStub(AdjustmentFactoryInterface::class);
-        $adjustmentFactory->method('createWithData')->willReturnCallback(
-            static function (string $type, string $label, int $amount): Adjustment {
-                $adjustment = new Adjustment();
-                $adjustment->setType($type);
-                $adjustment->setLabel($label);
-                $adjustment->setAmount($amount);
-
-                return $adjustment;
-            },
-        );
-
-        return $adjustmentFactory;
-    }
-
     private function createMoneyFormatter(): MoneyFormatterInterface
     {
         /** @var Stub&MoneyFormatterInterface $moneyFormatter */
@@ -312,7 +292,7 @@ final class ShippingEstimatorControllerTest extends TestCase
             ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
         ;
 
-        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
         self::assertStringContainsString('shipping_not_supported', (string) $response->getContent());
 
         // The early return happens inside the try, so only the finally can have reverted this.
@@ -365,18 +345,14 @@ final class ShippingEstimatorControllerTest extends TestCase
             $requestConfigurationFactory,
             $cartContext,
             $viewHandler,
+            $this->createFormFactory(),
+            $this->createStub(Environment::class),
             $addressFactory,
-            $this->createAdjustmentFactory(),
             $shippingMethodsResolver ?? $this->createMock(ShippingMethodsResolverInterface::class),
             $shippingCalculator ?? $this->createMock(DelegatingCalculatorInterface::class),
             $this->createMoneyFormatter(),
             $eventDispatcher,
         );
-
-        $container = new Container();
-        $container->set('form.factory', $this->createFormFactory());
-
-        $controller->setContainer($container);
 
         return $controller;
     }

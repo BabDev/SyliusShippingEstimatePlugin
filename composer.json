@@ -1,7 +1,11 @@
 {
     "name": "babdev/sylius-shipping-estimate-plugin",
     "type": "sylius-plugin",
-    "keywords": ["sylius", "sylius-plugin", "shipping-estimate"],
+    "keywords": [
+        "sylius",
+        "sylius-plugin",
+        "shipping-estimate"
+    ],
     "description": "Shipping estimate plugin for Sylius.",
     "license": "MIT",
     "require": {
@@ -9,11 +13,12 @@
         "sylius/sylius": "~1.11.2",
         "symfony/config": "^5.4",
         "symfony/dependency-injection": "^5.4",
-        "symfony/expression-language": "^5.4",
         "symfony/event-dispatcher-contracts": "^2.5",
+        "symfony/expression-language": "^5.4",
         "symfony/form": "^5.4",
         "symfony/framework-bundle": "^5.4",
-        "symfony/http-kernel": "^5.4"
+        "symfony/http-kernel": "^5.4",
+        "twig/twig": "^2.15 || ^3.3"
     },
     "require-dev": {
         "behat/behat": "^3.6.1",
@@ -63,7 +68,9 @@
         "psr-4": {
             "Tests\\BabDev\\SyliusShippingEstimatePlugin\\": "tests/"
         },
-        "classmap": ["tests/Application/Kernel.php"]
+        "classmap": [
+            "tests/Application/Kernel.php"
+        ]
     },
     "scripts": {
         "post-install-cmd": [

@@ -11,6 +11,8 @@
 - Make the messages shown by the JavaScript translatable, passing them to the script as `data-message-*` attributes on the estimator form
 - Render shipping method names as text rather than markup in the estimate table
 - Handle error responses that carry no JSON body instead of failing silently
+- Answer `shipping_not_supported` with a 200 response, matching `shipping_not_available`; both mean the estimate ran and found no rates
+- Decouple the controller from `Symfony\Bundle\FrameworkBundle\Controller\AbstractController`
 
 ## 0.2.0 (2022-07-15)
 

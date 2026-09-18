@@ -109,7 +109,7 @@
 
                         form.addClass('warning');
 
-                        if (response.reason === 'shipping_not_available') {
+                        if (response.reason === 'shipping_not_available' || response.reason === 'shipping_not_supported') {
                             showNoOptions();
 
                             return;
@@ -126,11 +126,6 @@
                         form.addClass('warning');
 
                         switch (payload.reason) {
-                            case 'shipping_not_supported':
-                                showNoOptions();
-
-                                break;
-
                             case 'shipping_calculator_error':
                                 showError(message('calculatorError'));
                                 showEnterAddress();

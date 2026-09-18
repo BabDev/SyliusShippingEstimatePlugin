@@ -12,32 +12,31 @@ use Sylius\Bundle\ResourceBundle\Controller\RequestConfigurationFactoryInterface
 use Sylius\Bundle\ResourceBundle\Controller\ViewHandlerInterface;
 use Sylius\Component\Core\Factory\AddressFactoryInterface;
 use Sylius\Component\Core\Model\AddressInterface;
-use Sylius\Component\Core\Model\AdjustmentInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\ShipmentInterface;
 use Sylius\Component\Core\Model\ShippingMethodInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
-use Sylius\Component\Order\Factory\AdjustmentFactoryInterface;
 use Sylius\Component\Resource\Metadata\MetadataInterface;
 use Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface;
 use Sylius\Component\Shipping\Resolver\ShippingMethodsResolverInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Twig\Environment;
 
-final class ShippingEstimatorController extends AbstractController
+final class ShippingEstimatorController
 {
     public function __construct(
         private MetadataInterface $metadata,
         private RequestConfigurationFactoryInterface $requestConfigurationFactory,
         private CartContextInterface $cartContext,
         private ViewHandlerInterface $viewHandler,
+        private FormFactoryInterface $formFactory,
+        private Environment $twig,
         private AddressFactoryInterface $addressFactory,
-        private AdjustmentFactoryInterface $adjustmentFactory,
         private ShippingMethodsResolverInterface $shippingMethodsResolver,
         private DelegatingCalculatorInterface $shippingCalculator,
         private MoneyFormatterInterface $moneyFormatter,
@@ -105,7 +104,7 @@ final class ShippingEstimatorController extends AbstractController
         $shipment->setOrder($cart);
 
         if (!$this->shippingMethodsResolver->supports($shipment)) {
-            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_supported'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_supported']);
         }
 
         $shippingOptions = [];
@@ -119,16 +118,12 @@ final class ShippingEstimatorController extends AbstractController
                 try {
                     $shipment->setMethod($shippingMethod);
 
-                    /** @var AdjustmentInterface $adjustment */
-                    $adjustment = $this->adjustmentFactory->createWithData(
-                        AdjustmentInterface::SHIPPING_ADJUSTMENT,
-                        $shippingMethod->getName(),
-                        $this->shippingCalculator->calculate($shipment),
-                    );
-
                     $shippingOptions[] = [
                         'name' => $shippingMethod->getName(),
-                        'rate' => $this->moneyFormatter->format($adjustment->getAmount(), $cart->getCurrencyCode()),
+                        'rate' => $this->moneyFormatter->format(
+                            $this->shippingCalculator->calculate($shipment),
+                            (string) $cart->getCurrencyCode(),
+                        ),
                     ];
                 } catch (\Exception) {
                     // Errored out getting a rate for this calculator, just skip it; we can show the calculator error message if the options list is totally empty
@@ -162,10 +157,13 @@ final class ShippingEstimatorController extends AbstractController
 
         $cart = $this->cartContext->getCart();
 
-        return $this->render($configuration->getTemplate('_widget.html'), [
+        /** @var string $template */
+        $template = $configuration->getTemplate('_widget.html');
+
+        return new Response($this->twig->render($template, [
             'cart' => $cart,
             'form' => $form->createView(),
-        ]);
+        ]));
     }
 
     /**
@@ -179,18 +177,15 @@ final class ShippingEstimatorController extends AbstractController
         $formType = (string) $configuration->getFormType();
         $formOptions = $configuration->getFormOptions();
 
-        /** @var FormFactoryInterface $formFactory */
-        $formFactory = $this->container->get('form.factory');
-
         if ($configuration->isHtmlRequest()) {
-            return $formFactory->create($formType, null, $formOptions);
+            return $this->formFactory->create($formType, null, $formOptions);
         }
 
         /*
          * The estimate is served from a GET route, so the form must be configured to match; a form
          * left at the default POST method is never submitted by `handleRequest()` on a GET request.
          */
-        return $formFactory->createNamed('', $formType, null, array_merge($formOptions, [
+        return $this->formFactory->createNamed('', $formType, null, array_merge($formOptions, [
             'csrf_protection' => false,
             'method' => Request::METHOD_GET,
         ]));
