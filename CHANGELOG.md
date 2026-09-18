@@ -4,6 +4,7 @@
 
 - Drop support for PHP 8.0
 - Use the `Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface` service in the shipping estimator controller instead of directly using the shipping calculator registry
+- Fix the AJAX shipping estimate endpoint erroring on every request
 
 ## 0.2.0 (2022-07-15)
 

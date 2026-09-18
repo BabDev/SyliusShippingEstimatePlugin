@@ -54,7 +54,7 @@ final class ShippingEstimatorController extends AbstractController
 
         $form->handleRequest($request);
 
-        if (!$form->isValid()) {
+        if (!$form->isSubmitted() || !$form->isValid()) {
             return $this->viewHandler->handle($configuration, View::create($form, Response::HTTP_BAD_REQUEST));
         }
 
@@ -162,6 +162,13 @@ final class ShippingEstimatorController extends AbstractController
             return $formFactory->create($formType, null, $formOptions);
         }
 
-        return $formFactory->createNamed('', $formType, null, array_merge($formOptions, ['csrf_protection' => false]));
+        /*
+         * The estimate is served from a GET route, so the form must be configured to match; a form
+         * left at the default POST method is never submitted by `handleRequest()` on a GET request.
+         */
+        return $formFactory->createNamed('', $formType, null, array_merge($formOptions, [
+            'csrf_protection' => false,
+            'method' => Request::METHOD_GET,
+        ]));
     }
 }
