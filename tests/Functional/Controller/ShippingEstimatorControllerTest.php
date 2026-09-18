@@ -22,6 +22,7 @@ use Sylius\Component\Addressing\Model\Country;
 use Sylius\Component\Addressing\Model\CountryInterface;
 use Sylius\Component\Core\Factory\AddressFactoryInterface;
 use Sylius\Component\Core\Model\Address;
+use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\Shipment;
 use Sylius\Component\Core\Model\ShippingMethodInterface;
@@ -238,6 +239,84 @@ final class ShippingEstimatorControllerTest extends TestCase
         );
 
         return $moneyFormatter;
+    }
+
+    /**
+     * @test
+     */
+    public function it_leaves_the_carts_own_shipping_address_untouched(): void
+    {
+        $method = $this->createShippingMethod('DHL');
+
+        $shipment = new Shipment();
+        $shipment->setMethod($method);
+
+        $existingAddress = new Address();
+        $existingAddress->setCountryCode('CA');
+        $existingAddress->setPostcode('V6B 1A1');
+
+        $cart = new Order();
+        $cart->setCurrencyCode('USD');
+        $cart->setShippingAddress($existingAddress);
+        $cart->addShipment($shipment);
+
+        /** @var Stub&ShippingMethodsResolverInterface $resolver */
+        $resolver = $this->createStub(ShippingMethodsResolverInterface::class);
+        $resolver->method('supports')->willReturn(true);
+        $resolver->method('getSupportedMethods')->willReturn([$method]);
+
+        /** @var Stub&DelegatingCalculatorInterface $calculator */
+        $calculator = $this->createStub(DelegatingCalculatorInterface::class);
+        $calculator->method('calculate')->willReturn(2000);
+
+        /** @var MockObject&ViewHandlerInterface $viewHandler */
+        $viewHandler = $this->createMock(ViewHandlerInterface::class);
+        $viewHandler->expects(self::never())->method('handle');
+
+        $response = $this->createController($viewHandler, new EventDispatcher(), $cart, $resolver, $calculator)
+            ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
+        ;
+
+        // The estimate still ran against the submitted address.
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
+        self::assertStringContainsString('$20.00', (string) $response->getContent());
+
+        // ...but the cart is left exactly as it was found, so a flush cannot persist the estimate.
+        self::assertSame($existingAddress, $cart->getShippingAddress());
+        self::assertSame('CA', $cart->getShippingAddress()->getCountryCode());
+    }
+
+    /**
+     * @test
+     */
+    public function it_restores_the_carts_shipping_address_when_the_estimate_cannot_be_completed(): void
+    {
+        $shipment = new Shipment();
+
+        $cart = new Order();
+        $cart->setCurrencyCode('USD');
+        $cart->addShipment($shipment);
+
+        // The cart had no shipping address of its own, which is the usual state for a fresh cart.
+        self::assertNull($cart->getShippingAddress());
+
+        /** @var Stub&ShippingMethodsResolverInterface $resolver */
+        $resolver = $this->createStub(ShippingMethodsResolverInterface::class);
+        $resolver->method('supports')->willReturn(false);
+
+        /** @var MockObject&ViewHandlerInterface $viewHandler */
+        $viewHandler = $this->createMock(ViewHandlerInterface::class);
+        $viewHandler->expects(self::never())->method('handle');
+
+        $response = $this->createController($viewHandler, new EventDispatcher(), $cart, $resolver)
+            ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
+        ;
+
+        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        self::assertStringContainsString('shipping_not_supported', (string) $response->getContent());
+
+        // The early return happens inside the try, so only the finally can have reverted this.
+        self::assertNull($cart->getShippingAddress());
     }
 
     private function createShippingMethod(string $code): ShippingMethodInterface

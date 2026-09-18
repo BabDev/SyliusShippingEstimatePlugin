@@ -75,8 +75,25 @@ final class ShippingEstimatorController extends AbstractController
 
         $address = $event->getAddress();
 
+        $originalShippingAddress = $cart->getShippingAddress();
+
+        // The shipping method resolver reads the address from the shipment's order, so the estimate address has to be put on the cart.
         $cart->setShippingAddress($address);
 
+        try {
+            return $this->buildEstimate($cart);
+        } finally {
+            $cart->setShippingAddress($originalShippingAddress);
+        }
+    }
+
+    /**
+     * Resolves the shipping methods available to the cart and prices each of them.
+     *
+     * Expects the address being estimated for to already be set on the cart.
+     */
+    private function buildEstimate(OrderInterface $cart): Response
+    {
         $shipments = $cart->getShipments();
 
         if ($shipments->count() === 0) {
