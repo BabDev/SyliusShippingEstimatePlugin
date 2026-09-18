@@ -23,6 +23,8 @@ interface SummaryPageInterface extends BaseSummaryPageInterface
      */
     public function getShippingOptions(): array;
 
+    public function getShippingEstimatorError(): string;
+
     public function countShippingOptions(): int;
 
     public function selectCountry(string $value): void;

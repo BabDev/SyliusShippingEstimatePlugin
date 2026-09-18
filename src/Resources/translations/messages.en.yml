@@ -2,8 +2,12 @@ babdev_sylius_shipping_estimate:
     ui:
         cost: 'Cost'
         enter_your_address_to_view_shipping_options: 'Enter your address to view shipping options'
+        error_getting_shipping_estimates_please_try_again: 'Error getting shipping estimates, please try again.'
         estimate_shipping_costs: 'Estimate Shipping Costs'
         method: 'Method'
+        please_fill_in_all_fields_to_estimate_your_shipping: 'Please fill in all fields to estimate your shipping.'
         shipping_not_available: 'Shipping not available'
         sorry_shipping_is_not_available_to_this_address: 'Sorry, shipping is not available to this address.'
+        sorry_there_was_a_temporary_error_calculating_shipping: "We're sorry, there was a temporary error calculating the shipping for your order. Please try again."
+        the_shipping_estimate_was_cancelled: 'The shipping estimate was cancelled.'
         view_estimate: 'View Estimate'

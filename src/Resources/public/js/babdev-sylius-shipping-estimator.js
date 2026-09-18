@@ -1,6 +1,14 @@
 (function ($) {
     'use strict';
 
+    // Fallbacks used when the widget markup does not carry the matching `data-message-*` attribute.
+    var MESSAGE_FALLBACKS = {
+        incompleteForm: 'Please fill in all fields to estimate your shipping.',
+        calculatorError: "We're sorry, there was a temporary error calculating the shipping for your order. Please try again.",
+        estimateCancelled: 'The shipping estimate was cancelled.',
+        genericError: 'Error getting shipping estimates, please try again.'
+    };
+
     $.fn.extend({
         shippingEstimator: function () {
             var form = $('#sylius-shipping-estimator');
@@ -9,23 +17,63 @@
             var optionsTable = $('#sylius-shipping-estimator-shipping-options');
             var errorContainer = $('#sylius-shipping-estimator-error');
 
+            var message = function (key) {
+                var provided = form.data('message' + key.charAt(0).toUpperCase() + key.slice(1));
+
+                return typeof provided === 'string' && provided !== '' ? provided : MESSAGE_FALLBACKS[key];
+            };
+
+            var showEnterAddress = function () {
+                enterAddressMessage.removeClass('hidden');
+                noOptionsMessage.addClass('hidden');
+                optionsTable.hide();
+            };
+
+            var showNoOptions = function () {
+                enterAddressMessage.addClass('hidden');
+                noOptionsMessage.removeClass('hidden');
+                optionsTable.hide();
+            };
+
+            var showOptions = function (options) {
+                var body = optionsTable.find('tbody').empty();
+
+                $.each(options, function (index, option) {
+                    $('<tr />')
+                        .append($('<td />').text(option.name))
+                        .append($('<td />').text(option.rate))
+                        .appendTo(body)
+                    ;
+                });
+
+                enterAddressMessage.addClass('hidden');
+                noOptionsMessage.addClass('hidden');
+                optionsTable.show();
+            };
+
+            var showError = function (text) {
+                errorContainer.text(text).removeClass('hidden');
+            };
+
+            var clearError = function () {
+                errorContainer.addClass('hidden').text('');
+            };
+
             form.on('submit', function (event) {
                 event.preventDefault();
 
-                var target = $(event.currentTarget);
-                target.removeClass('warning');
-
-                errorContainer.addClass('hidden').text('');
+                form.removeClass('warning');
+                clearError();
 
                 // Make sure fields are filled in before submitting
-                var countrySelect = $(event.currentTarget).find('select[name$="[country]"]');
-                var postcodeInput = $(event.currentTarget).find('input[name$="[postcode]"]');
+                var countrySelect = form.find('select[name$="[country]"]');
+                var postcodeInput = form.find('input[name$="[postcode]"]');
 
                 countrySelect.parent().removeClass('error');
                 postcodeInput.parent().removeClass('error');
 
                 if (countrySelect.val() === '' || postcodeInput.val() === '') {
-                    target.addClass('warning');
+                    form.addClass('warning');
 
                     if (countrySelect.val() === '') {
                         countrySelect.parent().addClass('error');
@@ -35,123 +83,80 @@
                         postcodeInput.parent().addClass('error');
                     }
 
-                    errorContainer
-                        .text('Please fill in all fields to estimate your shipping.')
-                        .removeClass('hidden')
-                    ;
-
-                    enterAddressMessage.removeClass('hidden');
-                    noOptionsMessage.addClass('hidden');
-                    optionsTable.hide();
+                    showError(message('incompleteForm'));
+                    showEnterAddress();
 
                     return;
                 }
 
-                var data = {
-                    country: countrySelect.val(),
-                    postcode: postcodeInput.val()
-                }
-
                 $.ajax({
-                    url: target.attr('data-url'),
+                    url: form.attr('data-url'),
                     type: 'GET',
-                    data: data,
+                    data: {
+                        country: countrySelect.val(),
+                        postcode: postcodeInput.val()
+                    },
                     beforeSend: function () {
-                        target.addClass('loading');
+                        form.addClass('loading');
                     },
                     success: function (response) {
-                        if (response.error) {
-                            if (response.reason === 'shipping_not_available') {
-                                target.addClass('warning');
+                        if (!response || !response.error) {
+                            form.removeClass('warning');
+                            showOptions(response && response.options ? response.options : []);
 
-                                enterAddressMessage.addClass('hidden');
-                                noOptionsMessage.removeClass('hidden');
-                                optionsTable.hide();
-                            }
-                        } else {
-                            var options = '';
-
-                            $(response.options).each(function (key, value) {
-                                options += '<tr><td>' + value.name + '</td><td>' + value.rate + '</td></tr>';
-                            });
-
-                            target.removeClass('warning');
-
-                            enterAddressMessage.addClass('hidden');
-                            noOptionsMessage.addClass('hidden');
-                            optionsTable.find('tbody').html(options);
-                            optionsTable.show();
+                            return;
                         }
+
+                        form.addClass('warning');
+
+                        if (response.reason === 'shipping_not_available') {
+                            showNoOptions();
+
+                            return;
+                        }
+
+                        showError(message('genericError'));
+                        showEnterAddress();
                     },
-                    error: function (response) {
-                        if (response.responseJSON.hasOwnProperty('reason')) {
-                            switch (response.responseJSON.reason) {
-                                case 'shipping_calculator_error':
-                                    errorContainer
-                                        .text("We're sorry, there was a temporary error calculating the shipping for your order. Please try again.")
-                                        .removeClass('hidden')
-                                    ;
+                    error: function (jqXHR) {
+                        // `responseJSON` is undefined whenever the response was not JSON at all, such as
+                        // an HTML error page, a failed connection or an aborted request.
+                        var payload = jqXHR && jqXHR.responseJSON ? jqXHR.responseJSON : {};
 
-                                    target.addClass('warning');
+                        form.addClass('warning');
 
-                                    enterAddressMessage.removeClass('hidden');
-                                    noOptionsMessage.addClass('hidden');
-                                    optionsTable.hide();
+                        switch (payload.reason) {
+                            case 'shipping_not_supported':
+                                showNoOptions();
 
-                                    break;
+                                break;
 
-                                case 'shipping_estimate_cancelled':
-                                    errorContainer
-                                        .text(response.responseJSON.hasOwnProperty('custom_reason') ? response.responseJSON.custom_reason : 'The shipping estimate was cancelled.')
-                                        .removeClass('hidden')
-                                    ;
+                            case 'shipping_calculator_error':
+                                showError(message('calculatorError'));
+                                showEnterAddress();
 
-                                    target.addClass('warning');
+                                break;
 
-                                    enterAddressMessage.removeClass('hidden');
-                                    noOptionsMessage.addClass('hidden');
-                                    optionsTable.hide();
+                            case 'shipping_estimate_cancelled':
+                                // The cancel reason is optional, so fall back when it is absent or empty.
+                                showError(
+                                    typeof payload.custom_reason === 'string' && payload.custom_reason !== ''
+                                        ? payload.custom_reason
+                                        : message('estimateCancelled')
+                                );
+                                showEnterAddress();
 
-                                    break;
+                                break;
 
-                                case 'shipping_not_supported':
-                                    target.addClass('warning');
+                            default:
+                                showError(message('genericError'));
+                                showEnterAddress();
 
-                                    enterAddressMessage.addClass('hidden');
-                                    noOptionsMessage.removeClass('hidden');
-                                    optionsTable.hide();
-
-                                    break;
-
-                                default:
-                                    errorContainer
-                                        .text('Error getting shipping estimates, please try again.')
-                                        .removeClass('hidden')
-                                    ;
-
-                                    target.removeClass('warning');
-
-                                    enterAddressMessage.removeClass('hidden');
-                                    noOptionsMessage.addClass('hidden');
-                                    optionsTable.hide();
-
-                                    break;
-                            }
-                        } else {
-                            errorContainer
-                                .text('Error getting shipping estimates, please try again.')
-                                .removeClass('hidden')
-                            ;
-
-                            target.removeClass('warning');
-
-                            enterAddressMessage.removeClass('hidden');
-                            noOptionsMessage.addClass('hidden');
-                            optionsTable.hide();
+                                break;
                         }
                     },
                     complete: function () {
-                        target.removeClass('loading');
+                        form.removeClass('loading');
                     }
                 });
             });

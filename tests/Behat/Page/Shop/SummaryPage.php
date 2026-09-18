@@ -54,6 +54,11 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
         return $options;
     }
 
+    public function getShippingEstimatorError(): string
+    {
+        return trim($this->getElement('shipping_estimator_error')->getText());
+    }
+
     public function countShippingOptions(): int
     {
         return count($this->getElement('shipping_options_table')->findAll('css', 'tbody tr'));
@@ -81,7 +86,10 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
          * before the estimate request has started and leaves the assertions racing the response.
          * Wait for the estimator's own request to start and then finish instead.
          */
-        $this->getDocument()->waitFor(5, static fn (): bool => $form->hasClass('loading'));
+        $error = $this->getElement('shipping_estimator_error');
+
+        // Either a request starts, or the widget rejects the form client side without making one.
+        $this->getDocument()->waitFor(5, static fn (): bool => $form->hasClass('loading') || !$error->hasClass('hidden'));
         $this->getDocument()->waitFor(10, static fn (): bool => !$form->hasClass('loading'));
     }
 

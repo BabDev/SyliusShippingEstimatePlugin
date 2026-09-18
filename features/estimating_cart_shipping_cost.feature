@@ -37,3 +37,13 @@ Feature: Estimating the shipping
         And I click the estimate shipping button
         Then the enter address message is not visible
         And the no shipping options message is visible
+
+    @ui @javascript
+    Scenario: Estimating shipping before filling in the whole form
+        When I add product "Banana" to the cart
+        Then I see the summary of my cart
+        And I see the shipping estimator
+        Then I choose "United States" as my country
+        And I click the estimate shipping button
+        Then the enter address message is visible
+        And I see the shipping estimator error "Please fill in all fields to estimate your shipping."

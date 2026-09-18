@@ -88,6 +88,14 @@ final class ShippingEstimatorContext implements Context
     }
 
     /**
+     * @When I see the shipping estimator error :error
+     */
+    public function iSeeTheShippingEstimatorError(string $error): void
+    {
+        Assert::same($this->summaryPage->getShippingEstimatorError(), $error);
+    }
+
+    /**
      * @When I see the following shipping options:
      */
     public function iSeeTheFollowingShippingOptions(TableNode $expectedOptions): void

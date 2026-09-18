@@ -8,6 +8,9 @@
 - Report shipping as unavailable instead of raising a server error when the cart has no shipment
 - Fix each shipping option being priced with the cart's existing shipping method instead of its own
 - Revert the estimate address on the cart once the estimate is built, so requesting an estimate no longer changes the customer's cart
+- Make the messages shown by the JavaScript translatable, passing them to the script as `data-message-*` attributes on the estimator form
+- Render shipping method names as text rather than markup in the estimate table
+- Handle error responses that carry no JSON body instead of failing silently
 
 ## 0.2.0 (2022-07-15)
 
