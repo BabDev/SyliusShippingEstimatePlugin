@@ -1,9 +1,6 @@
-includes:
-  - phpstan-baseline.neon
-
 parameters:
     level: max
-    reportUnmatchedIgnoredErrors: false
+    reportUnmatchedIgnoredErrors: true
     ignoreErrors:
         -
             identifier: missingType.iterableValue
@@ -11,11 +8,4 @@ parameters:
     paths:
         - src
         - tests/Behat
-
-    excludePaths:
-        # Makes PHPStan crash
-        # - 'src/DependencyInjection/Configuration.php'
-
-        # Test dependencies
-        - 'tests/Application/app/**.php'
-        - 'tests/Application/src/**.php'
+        - tests/Functional

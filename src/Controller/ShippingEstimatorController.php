@@ -59,10 +59,16 @@ final class ShippingEstimatorController
         /** @var OrderInterface $cart */
         $cart = $this->cartContext->getCart();
 
+        /** @var string|null $countryCode */
+        $countryCode = $form->get('country')->getData();
+
+        /** @var string|null $postcode */
+        $postcode = $form->get('postcode')->getData();
+
         /** @var AddressInterface $address */
         $address = $this->addressFactory->createNew();
-        $address->setCountryCode($form->get('country')->getData());
-        $address->setPostcode($form->get('postcode')->getData());
+        $address->setCountryCode($countryCode);
+        $address->setPostcode($postcode);
 
         $event = new BeforeEstimateShippingEvent($cart, $address);
 
