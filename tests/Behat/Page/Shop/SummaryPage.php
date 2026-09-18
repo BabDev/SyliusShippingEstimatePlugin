@@ -34,6 +34,26 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
         return !$this->getElement('no_shipping_options_message')->hasClass('hidden');
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function getShippingOptions(): array
+    {
+        $options = [];
+
+        foreach ($this->getElement('shipping_options_table')->findAll('css', 'tbody tr') as $row) {
+            $cells = $row->findAll('css', 'td');
+
+            if (count($cells) < 2) {
+                continue;
+            }
+
+            $options[trim($cells[0]->getText())] = trim($cells[1]->getText());
+        }
+
+        return $options;
+    }
+
     public function countShippingOptions(): int
     {
         return count($this->getElement('shipping_options_table')->findAll('css', 'tbody tr'));

@@ -94,24 +94,32 @@ final class ShippingEstimatorController extends AbstractController
         $shippingOptions = [];
         $hadError = false;
 
-        /** @var ShippingMethodInterface $shippingMethod */
-        foreach ($this->shippingMethodsResolver->getSupportedMethods($shipment) as $shippingMethod) {
-            try {
-                /** @var AdjustmentInterface $adjustment */
-                $adjustment = $this->adjustmentFactory->createWithData(
-                    AdjustmentInterface::SHIPPING_ADJUSTMENT,
-                    $shippingMethod->getName(),
-                    $this->shippingCalculator->calculate($shipment),
-                );
+        $originalShippingMethod = $shipment->getMethod();
 
-                $shippingOptions[] = [
-                    'name' => $shippingMethod->getName(),
-                    'rate' => $this->moneyFormatter->format($adjustment->getAmount(), $cart->getCurrencyCode()),
-                ];
-            } catch (\Exception) {
-                // Errored out getting a rate for this calculator, just skip it; we can show the calculator error message if the options list is totally empty
-                $hadError = true;
+        try {
+            /** @var ShippingMethodInterface $shippingMethod */
+            foreach ($this->shippingMethodsResolver->getSupportedMethods($shipment) as $shippingMethod) {
+                try {
+                    $shipment->setMethod($shippingMethod);
+
+                    /** @var AdjustmentInterface $adjustment */
+                    $adjustment = $this->adjustmentFactory->createWithData(
+                        AdjustmentInterface::SHIPPING_ADJUSTMENT,
+                        $shippingMethod->getName(),
+                        $this->shippingCalculator->calculate($shipment),
+                    );
+
+                    $shippingOptions[] = [
+                        'name' => $shippingMethod->getName(),
+                        'rate' => $this->moneyFormatter->format($adjustment->getAmount(), $cart->getCurrencyCode()),
+                    ];
+                } catch (\Exception) {
+                    // Errored out getting a rate for this calculator, just skip it; we can show the calculator error message if the options list is totally empty
+                    $hadError = true;
+                }
             }
+        } finally {
+            $shipment->setMethod($originalShippingMethod);
         }
 
         if ($shippingOptions === []) {

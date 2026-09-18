@@ -6,6 +6,7 @@
 - Use the `Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface` service in the shipping estimator controller instead of directly using the shipping calculator registry
 - Fix the AJAX shipping estimate endpoint erroring on every request
 - Report shipping as unavailable instead of raising a server error when the cart has no shipment
+- Fix each shipping option being priced with the cart's existing shipping method instead of its own
 
 ## 0.2.0 (2022-07-15)
 

@@ -23,11 +23,15 @@ use Sylius\Component\Addressing\Model\CountryInterface;
 use Sylius\Component\Core\Factory\AddressFactoryInterface;
 use Sylius\Component\Core\Model\Address;
 use Sylius\Component\Core\Model\OrderInterface;
+use Sylius\Component\Core\Model\Shipment;
+use Sylius\Component\Core\Model\ShippingMethodInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Sylius\Component\Order\Factory\AdjustmentFactoryInterface;
+use Sylius\Component\Order\Model\Adjustment;
 use Sylius\Component\Resource\Metadata\MetadataInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface;
+use Sylius\Component\Shipping\Model\ShipmentInterface;
 use Sylius\Component\Shipping\Resolver\ShippingMethodsResolverInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -137,10 +141,121 @@ final class ShippingEstimatorControllerTest extends TestCase
         );
     }
 
+    /**
+     * @test
+     */
+    public function it_calculates_a_rate_for_each_supported_shipping_method(): void
+    {
+        $dhl = $this->createShippingMethod('DHL');
+        $ups = $this->createShippingMethod('UPS');
+
+        $original = $this->createShippingMethod('ORIGINAL');
+
+        $shipment = new Shipment();
+        $shipment->setMethod($original);
+
+        /** @var Stub&OrderInterface $cart */
+        $cart = $this->createStub(OrderInterface::class);
+        $cart->method('getShipments')->willReturn(new ArrayCollection([$shipment]));
+        $cart->method('getCurrencyCode')->willReturn('USD');
+
+        /** @var Stub&ShippingMethodsResolverInterface $resolver */
+        $resolver = $this->createStub(ShippingMethodsResolverInterface::class);
+        $resolver->method('supports')->willReturn(true);
+        $resolver->method('getSupportedMethods')->willReturn([$dhl, $ups]);
+
+        // Keyed by method code, so a rate can only be correct if that method was applied first.
+        $rates = ['DHL' => 2000, 'UPS' => 2500];
+
+        /** @var Stub&DelegatingCalculatorInterface $calculator */
+        $calculator = $this->createStub(DelegatingCalculatorInterface::class);
+        $calculator->method('calculate')->willReturnCallback(
+            static function (ShipmentInterface $subject) use ($rates): int {
+                $method = $subject->getMethod();
+
+                self::assertNotNull($method, 'The shipment must carry the method being priced.');
+
+                return $rates[(string) $method->getCode()] ?? 0;
+            },
+        );
+
+        /** @var MockObject&ViewHandlerInterface $viewHandler */
+        $viewHandler = $this->createMock(ViewHandlerInterface::class);
+        $viewHandler->expects(self::never())->method('handle');
+
+        $controller = $this->createController(
+            $viewHandler,
+            new EventDispatcher(),
+            $cart,
+            $resolver,
+            $calculator,
+        );
+
+        $response = $controller->estimateShipping(
+            $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']),
+        );
+
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'error' => false,
+                'options' => [
+                    ['name' => 'DHL', 'rate' => '$20.00'],
+                    ['name' => 'UPS', 'rate' => '$25.00'],
+                ],
+                'reason' => null,
+            ], \JSON_THROW_ON_ERROR),
+            (string) $response->getContent(),
+        );
+
+        self::assertSame($original, $shipment->getMethod(), 'The shipment should keep the method it arrived with.');
+    }
+
+    private function createAdjustmentFactory(): AdjustmentFactoryInterface
+    {
+        /** @var Stub&AdjustmentFactoryInterface $adjustmentFactory */
+        $adjustmentFactory = $this->createStub(AdjustmentFactoryInterface::class);
+        $adjustmentFactory->method('createWithData')->willReturnCallback(
+            static function (string $type, string $label, int $amount): Adjustment {
+                $adjustment = new Adjustment();
+                $adjustment->setType($type);
+                $adjustment->setLabel($label);
+                $adjustment->setAmount($amount);
+
+                return $adjustment;
+            },
+        );
+
+        return $adjustmentFactory;
+    }
+
+    private function createMoneyFormatter(): MoneyFormatterInterface
+    {
+        /** @var Stub&MoneyFormatterInterface $moneyFormatter */
+        $moneyFormatter = $this->createStub(MoneyFormatterInterface::class);
+        $moneyFormatter->method('format')->willReturnCallback(
+            static fn (int $amount): string => '$' . number_format($amount / 100, 2),
+        );
+
+        return $moneyFormatter;
+    }
+
+    private function createShippingMethod(string $code): ShippingMethodInterface
+    {
+        /** @var Stub&ShippingMethodInterface $method */
+        $method = $this->createStub(ShippingMethodInterface::class);
+        $method->method('getCode')->willReturn($code);
+        $method->method('getName')->willReturn($code);
+
+        return $method;
+    }
+
     private function createController(
         ViewHandlerInterface $viewHandler,
         EventDispatcher $eventDispatcher,
         ?OrderInterface $cart = null,
+        ?ShippingMethodsResolverInterface $shippingMethodsResolver = null,
+        ?DelegatingCalculatorInterface $shippingCalculator = null,
     ): ShippingEstimatorController {
         /** @var Stub&MetadataInterface $metadata */
         $metadata = $this->createStub(MetadataInterface::class);
@@ -172,10 +287,10 @@ final class ShippingEstimatorControllerTest extends TestCase
             $cartContext,
             $viewHandler,
             $addressFactory,
-            $this->createMock(AdjustmentFactoryInterface::class),
-            $this->createMock(ShippingMethodsResolverInterface::class),
-            $this->createMock(DelegatingCalculatorInterface::class),
-            $this->createMock(MoneyFormatterInterface::class),
+            $this->createAdjustmentFactory(),
+            $shippingMethodsResolver ?? $this->createMock(ShippingMethodsResolverInterface::class),
+            $shippingCalculator ?? $this->createMock(DelegatingCalculatorInterface::class),
+            $this->createMoneyFormatter(),
             $eventDispatcher,
         );
 

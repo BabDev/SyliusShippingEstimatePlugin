@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\BabDev\SyliusShippingEstimatePlugin\Behat\Context\Ui\Shop;
 
 use Behat\Behat\Context\Context;
+use Behat\Gherkin\Node\TableNode;
 use Tests\BabDev\SyliusShippingEstimatePlugin\Behat\Page\Shop\SummaryPageInterface;
 use Webmozart\Assert\Assert;
 
@@ -87,10 +88,46 @@ final class ShippingEstimatorContext implements Context
     }
 
     /**
+     * @When I see the following shipping options:
+     */
+    public function iSeeTheFollowingShippingOptions(TableNode $expectedOptions): void
+    {
+        $expected = [];
+
+        foreach ($expectedOptions->getHash() as $row) {
+            $expected[$row['method']] = $row['cost'];
+        }
+
+        $actual = $this->summaryPage->getShippingOptions();
+
+        // Compared loosely so the assertion covers the rates without pinning the row order.
+        Assert::eq($actual, $expected, sprintf(
+            'Expected shipping options [%s] but got [%s].',
+            self::describeOptions($expected),
+            self::describeOptions($actual),
+        ));
+    }
+
+    /**
      * @When I see :count shipping options available
      */
     public function iSeeShippingOptions(int $count): void
     {
         Assert::same($this->summaryPage->countShippingOptions(), $count);
+    }
+
+    /**
+     * @param array<string, string> $options
+     */
+    private static function describeOptions(array $options): string
+    {
+        $described = [];
+
+        foreach ($options as $method => $cost) {
+            $described[] = $method . ' ' . $cost;
+        }
+
+        // Escaped because the caller's message is run through sprintf() by the assertion library.
+        return str_replace('%', '%%', implode(', ', $described));
     }
 }

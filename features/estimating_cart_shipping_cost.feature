@@ -21,6 +21,11 @@ Feature: Estimating the shipping
         Then the enter address message is not visible
         And the no shipping options message is not visible
         And I see "3" shipping options available
+        And I see the following shipping options:
+            | method | cost   |
+            | DHL    | $20.00 |
+            | UPS    | $25.00 |
+            | FedEx  | $30.00 |
 
     @ui @javascript
     Scenario: Estimating shipping for cart when shipping is not configured
