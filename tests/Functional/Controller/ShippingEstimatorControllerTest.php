@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Tests\BabDev\SyliusShippingEstimatePlugin\Functional\Controller;
 
 use BabDev\SyliusShippingEstimatePlugin\Controller\ShippingEstimatorController;
+use BabDev\SyliusShippingEstimatePlugin\Estimator\EventDispatchingShippingEstimator;
+use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimator;
 use BabDev\SyliusShippingEstimatePlugin\Event\BeforeEstimateShippingEvent;
 use BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType;
+use BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponder;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
@@ -428,7 +431,15 @@ final class ShippingEstimatorControllerTest extends TestCase
         $cartContext = $this->createStub(CartContextInterface::class);
         $cartContext->method('getCart')->willReturn($cart ?? $this->createStub(OrderInterface::class));
 
-        $controller = new ShippingEstimatorController(
+        $estimator = new EventDispatchingShippingEstimator(
+            new ShippingEstimator(
+                $shippingMethodsResolver ?? $this->createMock(ShippingMethodsResolverInterface::class),
+                $shippingCalculator ?? $this->createMock(DelegatingCalculatorInterface::class),
+            ),
+            $eventDispatcher,
+        );
+
+        return new ShippingEstimatorController(
             $metadata,
             $requestConfigurationFactory,
             $cartContext,
@@ -436,14 +447,10 @@ final class ShippingEstimatorControllerTest extends TestCase
             $this->createFormFactory(),
             $this->createStub(Environment::class),
             $addressFactory,
-            $shippingMethodsResolver ?? $this->createMock(ShippingMethodsResolverInterface::class),
-            $shippingCalculator ?? $this->createMock(DelegatingCalculatorInterface::class),
-            $this->createMoneyFormatter(),
-            $eventDispatcher,
+            $estimator,
+            new ShippingEstimateResponder($this->createMoneyFormatter()),
             $rateLimiterFactory,
         );
-
-        return $controller;
     }
 
     /**

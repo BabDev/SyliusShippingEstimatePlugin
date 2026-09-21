@@ -4,28 +4,23 @@ declare(strict_types=1);
 
 namespace BabDev\SyliusShippingEstimatePlugin\Controller;
 
-use BabDev\SyliusShippingEstimatePlugin\Event\BeforeEstimateShippingEvent;
+use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimatorInterface;
+use BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponderInterface;
 use FOS\RestBundle\View\View;
-use Sylius\Bundle\MoneyBundle\Formatter\MoneyFormatterInterface;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfiguration;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfigurationFactoryInterface;
 use Sylius\Bundle\ResourceBundle\Controller\ViewHandlerInterface;
 use Sylius\Component\Core\Factory\AddressFactoryInterface;
 use Sylius\Component\Core\Model\AddressInterface;
 use Sylius\Component\Core\Model\OrderInterface;
-use Sylius\Component\Core\Model\ShipmentInterface;
-use Sylius\Component\Core\Model\ShippingMethodInterface;
 use Sylius\Component\Order\Context\CartContextInterface;
 use Sylius\Component\Resource\Metadata\MetadataInterface;
-use Sylius\Component\Shipping\Calculator\DelegatingCalculatorInterface;
-use Sylius\Component\Shipping\Resolver\ShippingMethodsResolverInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment;
 
 final class ShippingEstimatorController
@@ -38,10 +33,8 @@ final class ShippingEstimatorController
         private FormFactoryInterface $formFactory,
         private Environment $twig,
         private AddressFactoryInterface $addressFactory,
-        private ShippingMethodsResolverInterface $shippingMethodsResolver,
-        private DelegatingCalculatorInterface $shippingCalculator,
-        private MoneyFormatterInterface $moneyFormatter,
-        private EventDispatcherInterface $eventDispatcher,
+        private ShippingEstimatorInterface $estimator,
+        private ShippingEstimateResponderInterface $responder,
         private ?RateLimiterFactory $rateLimiterFactory = null,
     ) {
     }
@@ -76,6 +69,17 @@ final class ShippingEstimatorController
         /** @var OrderInterface $cart */
         $cart = $this->cartContext->getCart();
 
+        return $this->responder->respond(
+            $this->estimator->estimate($cart, $this->createEstimateAddress($form)),
+            $request,
+        );
+    }
+
+    /**
+     * Builds the address to estimate for out of what the customer typed.
+     */
+    private function createEstimateAddress(FormInterface $form): AddressInterface
+    {
         /** @var string|null $countryCode */
         $countryCode = $form->get('country')->getData();
 
@@ -87,85 +91,7 @@ final class ShippingEstimatorController
         $address->setCountryCode($countryCode);
         $address->setPostcode($postcode);
 
-        $event = new BeforeEstimateShippingEvent($cart, $address);
-
-        $this->eventDispatcher->dispatch($event);
-
-        if ($event->isPropagationStopped()) {
-            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_estimate_cancelled', 'custom_reason' => $event->getCancelReason()], Response::HTTP_BAD_REQUEST);
-        }
-
-        $address = $event->getAddress();
-
-        $originalShippingAddress = $cart->getShippingAddress();
-
-        // The shipping method resolver reads the address from the shipment's order, so the estimate address has to be put on the cart.
-        $cart->setShippingAddress($address);
-
-        try {
-            return $this->buildEstimate($cart);
-        } finally {
-            $cart->setShippingAddress($originalShippingAddress);
-        }
-    }
-
-    /**
-     * Resolves the shipping methods available to the cart and prices each of them.
-     *
-     * Expects the address being estimated for to already be set on the cart.
-     */
-    private function buildEstimate(OrderInterface $cart): Response
-    {
-        $shipments = $cart->getShipments();
-
-        if ($shipments->count() === 0) {
-            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_available']);
-        }
-
-        /** @var ShipmentInterface $shipment */
-        $shipment = $shipments->first();
-        $shipment->setOrder($cart);
-
-        if (!$this->shippingMethodsResolver->supports($shipment)) {
-            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_supported']);
-        }
-
-        $shippingOptions = [];
-        $hadError = false;
-
-        $originalShippingMethod = $shipment->getMethod();
-
-        try {
-            /** @var ShippingMethodInterface $shippingMethod */
-            foreach ($this->shippingMethodsResolver->getSupportedMethods($shipment) as $shippingMethod) {
-                try {
-                    $shipment->setMethod($shippingMethod);
-
-                    $shippingOptions[] = [
-                        'name' => $shippingMethod->getName(),
-                        'rate' => $this->moneyFormatter->format(
-                            $this->shippingCalculator->calculate($shipment),
-                            (string) $cart->getCurrencyCode(),
-                        ),
-                    ];
-                } catch (\Exception) {
-                    // Errored out getting a rate for this calculator, just skip it; we can show the calculator error message if the options list is totally empty
-                    $hadError = true;
-                }
-            }
-        } finally {
-            $shipment->setMethod($originalShippingMethod);
-        }
-
-        if ($shippingOptions === []) {
-            if ($hadError) {
-                return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_calculator_error'], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-            return new JsonResponse(['error' => true, 'options' => [], 'reason' => 'shipping_not_available']);
-        }
-
-        return new JsonResponse(['error' => false, 'options' => $shippingOptions, 'reason' => null]);
+        return $address;
     }
 
     public function renderWidget(Request $request): Response
@@ -195,6 +121,9 @@ final class ShippingEstimatorController
      * Returns the response to send when the client has no requests left, or null to carry on. The
      * endpoint is unauthenticated and a shipping calculator may call an external carrier API on
      * every request, so the limit is keyed on the client address.
+     *
+     * This answer does not go through the responder: being refused is not an estimate, and there is
+     * no estimate to hand one.
      */
     private function enforceRateLimit(Request $request): ?Response
     {

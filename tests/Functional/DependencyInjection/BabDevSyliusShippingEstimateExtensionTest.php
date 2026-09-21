@@ -6,7 +6,12 @@ namespace Tests\BabDev\SyliusShippingEstimatePlugin\Functional\DependencyInjecti
 
 use BabDev\SyliusShippingEstimatePlugin\Controller\ShippingEstimatorController;
 use BabDev\SyliusShippingEstimatePlugin\DependencyInjection\BabDevSyliusShippingEstimateExtension;
+use BabDev\SyliusShippingEstimatePlugin\Estimator\EventDispatchingShippingEstimator;
+use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimator;
+use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimatorInterface;
 use BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType;
+use BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponder;
+use BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponderInterface;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
@@ -15,6 +20,12 @@ use Symfony\Component\DependencyInjection\Reference;
 final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionTestCase
 {
     private const CONTROLLER_ID = 'babdev_sylius_shipping_estimate.shop.controller.shipping_estimator';
+
+    private const ESTIMATOR_ID = 'babdev_sylius_shipping_estimate.estimator';
+
+    private const DEFAULT_ESTIMATOR_ID = 'babdev_sylius_shipping_estimate.estimator.default';
+
+    private const RESPONDER_ID = 'babdev_sylius_shipping_estimate.shop.estimate_responder';
 
     /**
      * @test
@@ -25,6 +36,42 @@ final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionT
 
         $this->assertContainerBuilderHasService(self::CONTROLLER_ID, ShippingEstimatorController::class);
         $this->assertContainerBuilderHasService('babdev_sylius_shipping_estimate.shop.form.type.shipping_estimator', ShippingEstimatorType::class);
+        $this->assertContainerBuilderHasService(self::DEFAULT_ESTIMATOR_ID, ShippingEstimator::class);
+        $this->assertContainerBuilderHasService(self::ESTIMATOR_ID, EventDispatchingShippingEstimator::class);
+        $this->assertContainerBuilderHasService(self::RESPONDER_ID, ShippingEstimateResponder::class);
+    }
+
+    /**
+     * @test
+     */
+    public function the_event_seam_wraps_the_estimator_that_prices_the_methods(): void
+    {
+        $this->load();
+
+        // The dispatch is the outer service, so replacing the inner one keeps the event.
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(
+            self::ESTIMATOR_ID,
+            0,
+            new Reference(self::DEFAULT_ESTIMATOR_ID),
+        );
+
+        $this->assertContainerBuilderHasServiceDefinitionWithArgument(
+            self::CONTROLLER_ID,
+            7,
+            new Reference(self::ESTIMATOR_ID),
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function the_seams_are_aliased_by_their_interfaces(): void
+    {
+        $this->load();
+
+        // What an integrator overrides or decorates to replace either half of the estimate.
+        $this->assertContainerBuilderHasAlias(ShippingEstimatorInterface::class, self::ESTIMATOR_ID);
+        $this->assertContainerBuilderHasAlias(ShippingEstimateResponderInterface::class, self::RESPONDER_ID);
     }
 
     /**
