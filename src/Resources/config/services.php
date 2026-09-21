@@ -44,7 +44,6 @@ return static function (ContainerConfigurator $container): void {
             expr('service("sylius.resource_registry").get("sylius.order")'),
             service('sylius.resource_controller.request_configuration_factory'),
             service('sylius.context.cart'),
-            service('sylius.resource_controller.view_handler'),
             service('form.factory'),
             service('twig'),
             service('sylius.factory.address'),

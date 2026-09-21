@@ -11,7 +11,6 @@ use BabDev\SyliusShippingEstimatePlugin\Event\BeforeEstimateShippingEvent;
 use BabDev\SyliusShippingEstimatePlugin\Form\Type\ShippingEstimatorType;
 use BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponder;
 use Doctrine\Common\Collections\ArrayCollection;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\AddressingBundle\Form\Type\CountryChoiceType;
@@ -20,7 +19,6 @@ use Sylius\Bundle\MoneyBundle\Formatter\MoneyFormatterInterface;
 use Sylius\Bundle\ResourceBundle\Controller\Parameters;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfiguration;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfigurationFactoryInterface;
-use Sylius\Bundle\ResourceBundle\Controller\ViewHandlerInterface;
 use Sylius\Component\Addressing\Model\Country;
 use Sylius\Component\Core\Factory\AddressFactoryInterface;
 use Sylius\Component\Core\Model\Address;
@@ -40,7 +38,6 @@ use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\Forms;
 use Symfony\Component\Form\PreloadedExtension;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
@@ -55,20 +52,43 @@ final class ShippingEstimatorControllerTest extends TestCase
      */
     public function it_handles_a_get_request_without_erroring_on_an_unsubmitted_form(): void
     {
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-        $viewHandler
-            ->expects(self::once())
-            ->method('handle')
-            ->willReturn(new JsonResponse(['error' => true], Response::HTTP_BAD_REQUEST))
-        ;
+        $controller = $this->createController(new EventDispatcher());
 
-        $controller = $this->createController($viewHandler, new EventDispatcher());
-
-        // No query data, so the form submits empty and fails validation rather than never submitting at all.
+        // Carries none of the form's fields, so the form is never submitted at all.
         $response = $controller->estimateShipping($this->createEstimateRequest([]));
 
         self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'error' => true,
+                'options' => [],
+                'reason' => 'shipping_estimate_invalid_request',
+            ], \JSON_THROW_ON_ERROR),
+            (string) $response->getContent(),
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function it_answers_an_address_it_cannot_use_with_the_invalid_request_reason(): void
+    {
+        $controller = $this->createController(new EventDispatcher());
+
+        // A country code outside the choice list is what a real request fails validation on.
+        $response = $controller->estimateShipping(
+            $this->createEstimateRequest(['country' => 'ZZ', 'postcode' => '90802']),
+        );
+
+        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'error' => true,
+                'options' => [],
+                'reason' => 'shipping_estimate_invalid_request',
+            ], \JSON_THROW_ON_ERROR),
+            (string) $response->getContent(),
+        );
     }
 
     /**
@@ -90,11 +110,7 @@ final class ShippingEstimatorControllerTest extends TestCase
             },
         );
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-        $viewHandler->expects(self::never())->method('handle');
-
-        $controller = $this->createController($viewHandler, $eventDispatcher);
+        $controller = $this->createController($eventDispatcher);
 
         $response = $controller->estimateShipping(
             $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']),
@@ -125,11 +141,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $cart = $this->createStub(OrderInterface::class);
         $cart->method('getShipments')->willReturn(new ArrayCollection());
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-        $viewHandler->expects(self::never())->method('handle');
-
-        $response = $this->createController($viewHandler, new EventDispatcher(), $cart)->estimateShipping(
+        $response = $this->createController(new EventDispatcher(), $cart)->estimateShipping(
             $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']),
         );
 
@@ -182,12 +194,7 @@ final class ShippingEstimatorControllerTest extends TestCase
             },
         );
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-        $viewHandler->expects(self::never())->method('handle');
-
         $controller = $this->createController(
-            $viewHandler,
             new EventDispatcher(),
             $cart,
             $resolver,
@@ -253,11 +260,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $calculator = $this->createStub(DelegatingCalculatorInterface::class);
         $calculator->method('calculate')->willReturn(2000);
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-        $viewHandler->expects(self::never())->method('handle');
-
-        $response = $this->createController($viewHandler, new EventDispatcher(), $cart, $resolver, $calculator)
+        $response = $this->createController(new EventDispatcher(), $cart, $resolver, $calculator)
             ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
         ;
 
@@ -288,11 +291,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $resolver = $this->createStub(ShippingMethodsResolverInterface::class);
         $resolver->method('supports')->willReturn(false);
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-        $viewHandler->expects(self::never())->method('handle');
-
-        $response = $this->createController($viewHandler, new EventDispatcher(), $cart, $resolver)
+        $response = $this->createController(new EventDispatcher(), $cart, $resolver)
             ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
         ;
 
@@ -312,10 +311,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $cart = $this->createStub(OrderInterface::class);
         $cart->method('getShipments')->willReturn(new ArrayCollection());
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-
-        $response = $this->createController($viewHandler, new EventDispatcher(), $cart)
+        $response = $this->createController(new EventDispatcher(), $cart)
             ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
         ;
 
@@ -341,11 +337,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $cart = $this->createStub(OrderInterface::class);
         $cart->method('getShipments')->willReturn(new ArrayCollection());
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-
         $controller = $this->createController(
-            $viewHandler,
             new EventDispatcher(),
             $cart,
             null,
@@ -376,10 +368,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $cart = $this->createStub(OrderInterface::class);
         $cart->method('getShipments')->willReturn(new ArrayCollection());
 
-        /** @var MockObject&ViewHandlerInterface $viewHandler */
-        $viewHandler = $this->createMock(ViewHandlerInterface::class);
-
-        $controller = $this->createController($viewHandler, new EventDispatcher(), $cart);
+        $controller = $this->createController(new EventDispatcher(), $cart);
 
         $request = $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']);
 
@@ -399,7 +388,6 @@ final class ShippingEstimatorControllerTest extends TestCase
     }
 
     private function createController(
-        ViewHandlerInterface $viewHandler,
         EventDispatcher $eventDispatcher,
         ?OrderInterface $cart = null,
         ?ShippingMethodsResolverInterface $shippingMethodsResolver = null,
@@ -442,7 +430,6 @@ final class ShippingEstimatorControllerTest extends TestCase
             $metadata,
             $requestConfigurationFactory,
             $cartContext,
-            $viewHandler,
             $this->createFormFactory(),
             $this->createStub(Environment::class),
             $addressFactory,

@@ -25,4 +25,9 @@ final class ShippingEstimateReasons
      * A listener on the before-estimate event stopped the estimate.
      */
     public const CANCELLED = 'shipping_estimate_cancelled';
+
+    /**
+     * The request did not describe an address to estimate for, so no estimate was attempted.
+     */
+    public const INVALID_REQUEST = 'shipping_estimate_invalid_request';
 }

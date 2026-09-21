@@ -57,7 +57,7 @@ final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionT
 
         $this->assertContainerBuilderHasServiceDefinitionWithArgument(
             self::CONTROLLER_ID,
-            7,
+            6,
             new Reference(self::ESTIMATOR_ID),
         );
     }

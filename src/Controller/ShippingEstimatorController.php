@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace BabDev\SyliusShippingEstimatePlugin\Controller;
 
+use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimate;
+use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimateReasons;
 use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimatorInterface;
 use BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponderInterface;
-use FOS\RestBundle\View\View;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfiguration;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfigurationFactoryInterface;
-use Sylius\Bundle\ResourceBundle\Controller\ViewHandlerInterface;
 use Sylius\Component\Core\Factory\AddressFactoryInterface;
 use Sylius\Component\Core\Model\AddressInterface;
 use Sylius\Component\Core\Model\OrderInterface;
@@ -29,7 +29,6 @@ final class ShippingEstimatorController
         private MetadataInterface $metadata,
         private RequestConfigurationFactoryInterface $requestConfigurationFactory,
         private CartContextInterface $cartContext,
-        private ViewHandlerInterface $viewHandler,
         private FormFactoryInterface $formFactory,
         private Environment $twig,
         private AddressFactoryInterface $addressFactory,
@@ -63,7 +62,10 @@ final class ShippingEstimatorController
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            return $this->viewHandler->handle($configuration, View::create($form, Response::HTTP_BAD_REQUEST));
+            return $this->responder->respond(
+                ShippingEstimate::unavailable(ShippingEstimateReasons::INVALID_REQUEST),
+                $request,
+            );
         }
 
         /** @var OrderInterface $cart */
@@ -99,10 +101,6 @@ final class ShippingEstimatorController
         $configuration = $this->requestConfigurationFactory->create($this->metadata, $request);
 
         $form = $this->createEstimatorForm($configuration);
-
-        if (!$configuration->isHtmlRequest()) {
-            return $this->viewHandler->handle($configuration, View::create($form));
-        }
 
         $cart = $this->cartContext->getCart();
 

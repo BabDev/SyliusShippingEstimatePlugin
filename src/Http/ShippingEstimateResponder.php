@@ -26,6 +26,7 @@ final class ShippingEstimateResponder implements ShippingEstimateResponderInterf
      */
     public const DEFAULT_STATUS_CODES = [
         ShippingEstimateReasons::CANCELLED => Response::HTTP_BAD_REQUEST,
+        ShippingEstimateReasons::INVALID_REQUEST => Response::HTTP_BAD_REQUEST,
         ShippingEstimateReasons::CALCULATOR_ERROR => Response::HTTP_INTERNAL_SERVER_ERROR,
     ];
 

@@ -4,6 +4,7 @@
 
 - Add support for Sylius 1.12 and Symfony 6.4
 - Drop support for Sylius 1.11
+- Answer an estimate request with no usable address using the endpoint's normal JSON envelope with reason `shipping_estimate_invalid_request` instead of a serialized form
 
 ## 0.3.0 (2026-09-21)
 

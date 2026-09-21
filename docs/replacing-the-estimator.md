@@ -83,12 +83,13 @@ An implementation that puts anything on the cart or its shipments must put the o
 
 An estimate with no options in it always carries a reason. The plugin's own are constants on `BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimateReasons`:
 
-| Constant           | Value                         | Meaning                                                      |
-|--------------------|-------------------------------|--------------------------------------------------------------|
-| `NOT_AVAILABLE`    | `shipping_not_available`      | The estimate ran and found no rates                          |
-| `NOT_SUPPORTED`    | `shipping_not_supported`      | Shipping methods could not be resolved for the cart          |
-| `CALCULATOR_ERROR` | `shipping_calculator_error`   | Every shipping method errored out while being priced         |
-| `CANCELLED`        | `shipping_estimate_cancelled` | A listener stopped the estimate                              |
+| Constant           | Value                               | Meaning                                                     |
+|--------------------|-------------------------------------|-------------------------------------------------------------|
+| `NOT_AVAILABLE`    | `shipping_not_available`            | The estimate ran and found no rates                         |
+| `NOT_SUPPORTED`    | `shipping_not_supported`            | Shipping methods could not be resolved for the cart         |
+| `CALCULATOR_ERROR` | `shipping_calculator_error`         | Every shipping method errored out while being priced        |
+| `CANCELLED`        | `shipping_estimate_cancelled`       | A listener stopped the estimate                             |
+| `INVALID_REQUEST`  | `shipping_estimate_invalid_request` | The request did not describe an address, so no estimate ran |
 
 Your estimator may report reasons of its own, including what your carriers actually refuse for, and nothing downstream assumes a reason came from that list. To word one for the customer, add a `data-message-{reason}` attribute to the widget's form; see [Customize the Output](/open-source/packages/shipping-estimate-plugin/docs/1.x/customize-the-output).
 
@@ -108,7 +109,7 @@ Metadata is merged **under** the keys the endpoint already sends, so `error`, `o
 
 Replace `BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponderInterface` to change the payload itself, or the status a reason is answered with.
 
-The plugin's responder answers a canceled estimate with a `400` and a calculator error with a `500`; every other reason, including any of your own, gets a `200`, on the grounds that an estimate which ran and came back with nothing is an answer rather than a failure. That mapping is its second constructor argument:
+The plugin's responder answers a canceled estimate and an invalid request with a `400`, and a calculator error with a `500`; every other reason, including any of your own, gets a `200`, on the grounds that an estimate which ran and came back with nothing is an answer rather than a failure. That mapping is its second constructor argument:
 
 ```yaml
 services:
@@ -117,6 +118,7 @@ services:
         arguments:
             - '@sylius.money_formatter'
             - shipping_estimate_cancelled: 400
+              shipping_estimate_invalid_request: 400
               shipping_calculator_error: 500
               package_overweight: 400
 ```

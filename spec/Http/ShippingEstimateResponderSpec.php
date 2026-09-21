@@ -81,6 +81,19 @@ class ShippingEstimateResponderSpec extends ObjectBehavior
         );
     }
 
+    public function it_reports_a_request_without_an_address_as_a_bad_request(): void
+    {
+        $response = $this->respond(
+            ShippingEstimate::unavailable(ShippingEstimateReasons::INVALID_REQUEST),
+            $this->createRequest(),
+        );
+
+        $response->getStatusCode()->shouldReturn(Response::HTTP_BAD_REQUEST);
+        $response->getContent()->shouldReturn(
+            '{"error":true,"options":[],"reason":"shipping_estimate_invalid_request"}',
+        );
+    }
+
     public function it_reports_a_calculator_error_as_a_server_error(): void
     {
         $response = $this->respond(
