@@ -6,7 +6,7 @@ The [Sylius](https://sylius.com/) shipping estimate plugin adds support for ship
 
 ## Documentation
 
-Please see the [BabDev website](https://www.babdev.com/open-source/packages/syliusshippingestimateplugin/docs/1.x) for detailed information on how to use this plugin.
+Please see the [BabDev website](https://www.babdev.com/open-source/packages/shipping-estimate-plugin/docs/1.x) for detailed information on how to use this plugin.
 
 ## Security
 
