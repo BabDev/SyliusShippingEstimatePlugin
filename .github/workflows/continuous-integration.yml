@@ -107,7 +107,7 @@ jobs:
 
             -
                 name: Install PHP dependencies
-                run: composer update --no-interaction
+                run: composer update --no-interaction --no-blocking
                 env:
                     SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
@@ -220,7 +220,7 @@ jobs:
 
             -
                 name: Install PHP dependencies
-                run: composer update --no-interaction
+                run: composer update --no-interaction --no-blocking
                 env:
                     SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
@@ -274,7 +274,7 @@ jobs:
 
             -
                 name: Install PHP dependencies
-                run: composer update --no-interaction
+                run: composer update --no-interaction --no-blocking
                 env:
                     SYMFONY_REQUIRE: ${{ matrix.symfony }}
 
