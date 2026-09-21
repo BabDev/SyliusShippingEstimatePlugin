@@ -13,6 +13,8 @@
     <php>
         <ini name="error_reporting" value="-1" />
 
+        <server name="KERNEL_CLASS_PATH" value="/tests/Application/Kernel.php" />
+
         <env name="APP_ENV" value="test"/>
         <env name="SHELL_VERBOSITY" value="-1" />
     </php>
