@@ -109,10 +109,7 @@ final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionT
     {
         $this->load(['rate_limiter' => ['enabled' => false]]);
 
-        self::assertArrayNotHasKey(
-            '$rateLimiterFactory',
-            $this->container->getDefinition(self::CONTROLLER_ID)->getArguments(),
-        );
+        $this->assertArrayNotHasKey('$rateLimiterFactory', $this->container->getDefinition(self::CONTROLLER_ID)->getArguments());
     }
 
     /**
@@ -122,7 +119,7 @@ final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionT
     {
         $container = $this->prependWith(['rate_limiter' => ['limit' => 5, 'interval' => '30 seconds']]);
 
-        self::assertSame(
+        $this->assertSame(
             [
                 [
                     'rate_limiter' => [
@@ -149,7 +146,7 @@ final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionT
     {
         $container = $this->prependWith(['rate_limiter' => ['service' => 'app.limiter.shipping']]);
 
-        self::assertSame([], $container->getExtensionConfig('framework'));
+        $this->assertSame([], $container->getExtensionConfig('framework'));
     }
 
     /**
@@ -159,7 +156,7 @@ final class BabDevSyliusShippingEstimateExtensionTest extends AbstractExtensionT
     {
         $container = $this->prependWith(['rate_limiter' => ['enabled' => false]]);
 
-        self::assertSame([], $container->getExtensionConfig('framework'));
+        $this->assertSame([], $container->getExtensionConfig('framework'));
     }
 
     /**

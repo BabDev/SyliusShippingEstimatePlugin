@@ -59,8 +59,8 @@ final class ShippingEstimatorControllerTest extends TestCase
         // Carries none of the form's fields, so the form is never submitted at all.
         $response = $controller->estimateShipping($this->createEstimateRequest([]));
 
-        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        self::assertJsonStringEqualsJsonString(
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString(
             json_encode([
                 'error' => true,
                 'options' => [],
@@ -80,8 +80,8 @@ final class ShippingEstimatorControllerTest extends TestCase
         // Submitted, so it is the constraints rather than the missing submission that reject it.
         $response = $controller->estimateShipping($this->createEstimateRequest(['country' => 'US']));
 
-        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        self::assertJsonStringEqualsJsonString(
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString(
             json_encode([
                 'error' => true,
                 'options' => [],
@@ -103,15 +103,12 @@ final class ShippingEstimatorControllerTest extends TestCase
             $this->createEstimateRequest(['country' => 'ZZ', 'postcode' => '90802']),
         );
 
-        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        self::assertJsonStringEqualsJsonString(
-            json_encode([
-                'error' => true,
-                'options' => [],
-                'reason' => 'shipping_estimate_invalid_request',
-            ], \JSON_THROW_ON_ERROR),
-            (string) $response->getContent(),
-        );
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString(json_encode([
+            'error' => true,
+            'options' => [],
+            'reason' => 'shipping_estimate_invalid_request',
+        ], \JSON_THROW_ON_ERROR), (string) $response->getContent());
     }
 
     /**
@@ -139,12 +136,12 @@ final class ShippingEstimatorControllerTest extends TestCase
             $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']),
         );
 
-        self::assertInstanceOf(BeforeEstimateShippingEvent::class, $dispatchedEvent);
-        self::assertSame('US', $dispatchedEvent->getAddress()->getCountryCode());
-        self::assertSame('90802', $dispatchedEvent->getAddress()->getPostcode());
+        $this->assertInstanceOf(BeforeEstimateShippingEvent::class, $dispatchedEvent);
+        $this->assertSame('US', $dispatchedEvent->getAddress()->getCountryCode());
+        $this->assertSame('90802', $dispatchedEvent->getAddress()->getPostcode());
 
-        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
-        self::assertJsonStringEqualsJsonString(
+        $this->assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString(
             json_encode([
                 'error' => true,
                 'options' => [],
@@ -168,8 +165,8 @@ final class ShippingEstimatorControllerTest extends TestCase
             $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']),
         );
 
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
-        self::assertJsonStringEqualsJsonString(
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString(
             json_encode([
                 'error' => true,
                 'options' => [],
@@ -228,8 +225,8 @@ final class ShippingEstimatorControllerTest extends TestCase
             $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']),
         );
 
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
-        self::assertJsonStringEqualsJsonString(
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString(
             json_encode([
                 'error' => false,
                 'options' => [
@@ -241,7 +238,7 @@ final class ShippingEstimatorControllerTest extends TestCase
             (string) $response->getContent(),
         );
 
-        self::assertSame($original, $shipment->getMethod(), 'The shipment should keep the method it arrived with.');
+        $this->assertSame($original, $shipment->getMethod(), 'The shipment should keep the method it arrived with.');
     }
 
     private function createMoneyFormatter(): MoneyFormatterInterface
@@ -288,12 +285,12 @@ final class ShippingEstimatorControllerTest extends TestCase
         ;
 
         // The estimate still ran against the submitted address.
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
-        self::assertStringContainsString('$20.00', (string) $response->getContent());
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertStringContainsString('$20.00', (string) $response->getContent());
 
         // ...but the cart is left exactly as it was found, so a flush cannot persist the estimate.
-        self::assertSame($existingAddress, $cart->getShippingAddress());
-        self::assertSame('CA', $cart->getShippingAddress()->getCountryCode());
+        $this->assertSame($existingAddress, $cart->getShippingAddress());
+        $this->assertSame('CA', $cart->getShippingAddress()->getCountryCode());
     }
 
     /**
@@ -308,7 +305,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $cart->addShipment($shipment);
 
         // The cart had no shipping address of its own, which is the usual state for a fresh cart.
-        self::assertNull($cart->getShippingAddress());
+        $this->assertNull($cart->getShippingAddress());
 
         /** @var Stub&ShippingMethodsResolverInterface $resolver */
         $resolver = $this->createStub(ShippingMethodsResolverInterface::class);
@@ -318,11 +315,11 @@ final class ShippingEstimatorControllerTest extends TestCase
             ->estimateShipping($this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']))
         ;
 
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
-        self::assertStringContainsString('shipping_not_supported', (string) $response->getContent());
+        $this->assertSame(Response::HTTP_OK, $response->getStatusCode());
+        $this->assertStringContainsString('shipping_not_supported', (string) $response->getContent());
 
         // The early return happens inside the try, so only the finally can have reverted this.
-        self::assertNull($cart->getShippingAddress());
+        $this->assertNull($cart->getShippingAddress());
     }
 
     /**
@@ -341,8 +338,8 @@ final class ShippingEstimatorControllerTest extends TestCase
         $cacheControl = (string) $response->headers->get('Cache-Control');
 
         // One customer's rates must never be served to another from a shared cache.
-        self::assertStringContainsString('no-store', $cacheControl);
-        self::assertStringContainsString('private', $cacheControl);
+        $this->assertStringContainsString('no-store', $cacheControl);
+        $this->assertStringContainsString('private', $cacheControl);
     }
 
     /**
@@ -371,15 +368,15 @@ final class ShippingEstimatorControllerTest extends TestCase
         $request = $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']);
 
         $allowed = $controller->estimateShipping($request);
-        self::assertSame(Response::HTTP_OK, $allowed->getStatusCode());
+        $this->assertSame(Response::HTTP_OK, $allowed->getStatusCode());
 
         $refused = $controller->estimateShipping($request);
 
-        self::assertSame(Response::HTTP_TOO_MANY_REQUESTS, $refused->getStatusCode());
-        self::assertStringContainsString('shipping_estimate_rate_limited', (string) $refused->getContent());
-        self::assertTrue($refused->headers->has('Retry-After'));
-        self::assertSame('1', $refused->headers->get('X-RateLimit-Limit'));
-        self::assertStringContainsString('no-store', (string) $refused->headers->get('Cache-Control'));
+        $this->assertSame(Response::HTTP_TOO_MANY_REQUESTS, $refused->getStatusCode());
+        $this->assertStringContainsString('shipping_estimate_rate_limited', (string) $refused->getContent());
+        $this->assertTrue($refused->headers->has('Retry-After'));
+        $this->assertSame('1', $refused->headers->get('X-RateLimit-Limit'));
+        $this->assertStringContainsString('no-store', (string) $refused->headers->get('Cache-Control'));
     }
 
     /**
@@ -396,7 +393,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $request = $this->createEstimateRequest(['country' => 'US', 'postcode' => '90802']);
 
         for ($i = 0; $i < 5; ++$i) {
-            self::assertSame(Response::HTTP_OK, $controller->estimateShipping($request)->getStatusCode());
+            $this->assertSame(Response::HTTP_OK, $controller->estimateShipping($request)->getStatusCode());
         }
     }
 

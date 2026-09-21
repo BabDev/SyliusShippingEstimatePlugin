@@ -4,6 +4,12 @@ includes:
 parameters:
     level: max
     reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        # PHPUnit's assertions are static, but the convention is to call them on $this.
+        -
+            identifier: staticMethod.dynamicCall
+            path: tests/Functional/*
     paths:
         - src
         - tests/Behat

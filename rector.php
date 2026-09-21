@@ -9,6 +9,7 @@ return RectorConfig::configure()
         __DIR__.'/tests',
     ])
     ->withSkipPath(__DIR__.'/tests/Application/config/bundles.php')
+    ->withSkipPath(__DIR__.'/tests/Application/node_modules')
     ->withSkipPath(__DIR__.'/tests/Application/var')
     ->withImportNames(importShortClasses: false)
     ->withPHPStanConfigs([
