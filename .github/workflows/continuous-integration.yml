@@ -24,7 +24,7 @@ jobs:
                 php: ["8.1"]
                 symfony: ["5.4.*"]
                 sylius: ["~1.11.2"]
-                node: ["20.x"]
+                node: ["14.x"]
                 mysql: ["8.0"]
 
         services:
@@ -95,14 +95,14 @@ jobs:
             -
                 name: Get Composer cache directory
                 id: composer-cache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             -
                 name: Cache Composer
                 uses: actions/cache@v6
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
+                    key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json', '**/composer.lock') }}
                     restore-keys: |
                         ${{ runner.os }}-php-${{ matrix.php }}-composer-
 
@@ -119,7 +119,7 @@ jobs:
 
             -
                 name: Install JS dependencies
-                run: (cd tests/Application && yarn install)
+                run: (cd tests/Application && yarn install --frozen-lockfile --ignore-engines)
 
             -
                 name: Build application assets
@@ -208,14 +208,14 @@ jobs:
             -
                 name: Get Composer cache directory
                 id: composer-cache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             -
                 name: Cache Composer
                 uses: actions/cache@v6
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
+                    key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json', '**/composer.lock') }}
                     restore-keys: |
                         ${{ runner.os }}-php-${{ matrix.php }}-composer-
 
@@ -262,14 +262,14 @@ jobs:
             -
                 name: Get Composer cache directory
                 id: composer-cache
-                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
             -
                 name: Cache Composer
                 uses: actions/cache@v6
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json **/composer.lock') }}
+                    key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json', '**/composer.lock') }}
                     restore-keys: |
                         ${{ runner.os }}-php-${{ matrix.php }}-composer-
 
