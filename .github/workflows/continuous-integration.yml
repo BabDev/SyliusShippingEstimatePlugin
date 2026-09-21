@@ -75,6 +75,12 @@ jobs:
                 run: php -v | head -n 1 | awk '{ print $2 }' > .php-version
 
             -
+                name: Create NSS database for certificate installation
+                run: |
+                    mkdir -p "$HOME/.pki/nssdb"
+                    certutil -d "sql:$HOME/.pki/nssdb" -N --empty-password
+
+            -
                 name: Install certificates
                 run: symfony server:ca:install
 
