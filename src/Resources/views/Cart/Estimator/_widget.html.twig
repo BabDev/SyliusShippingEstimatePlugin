@@ -19,7 +19,7 @@
 
     <div class="ui stackable two column grid">
         <div class="column">
-            {% include '@SyliusShop/Common/Form/_countryCode.html.twig' with {'form': form.country, 'type': 'shipping-estimate'} %}
+            {% include '@SyliusShop/Common/Form/_countryCode.html.twig' with {'form': form.country, 'type': 'shipping-estimate-'} %}
 
             {{ form_row(form.postcode) }}
         </div>

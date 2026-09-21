@@ -16,6 +16,7 @@
 - Add optional rate limiting to the shipping estimate endpoint, enabled by default when `symfony/rate-limiter` is installed and configurable under the new `babdev_sylius_shipping_estimate` configuration key
 - Send estimate responses with `Cache-Control: no-store, private` so shared caches cannot serve one customer's rates to another
 - Declare `friendsofsymfony/rest-bundle` and `symfony/http-foundation` as direct dependencies; both are imported directly by the plugin and were previously relied on transitively
+- Fix the estimator's country field rendering its test attribute as `data-test-shipping-estimatecountry`; it is now `data-test-shipping-estimate-country`
 
 ## 0.2.0 (2022-07-15)
 

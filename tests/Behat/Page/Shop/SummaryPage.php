@@ -98,7 +98,7 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
         return array_merge(parent::getDefinedElements(), [
             'shipping_estimator' => '[data-test-cart-shipping-estimator]',
             'shipping_estimator_form' => '#sylius-shipping-estimator',
-            'shipping_estimator_country' => '[data-test-shipping-estimatecountry]',
+            'shipping_estimator_country' => '[data-test-shipping-estimate-country]',
             'shipping_estimator_postcode' => '#babdev_sylius_shipping_estimator_postcode',
             'estimate_shipping_button' => '[data-test-estimate-shipping]',
             'enter_address_message' => '[data-test-enter-address-message]',
