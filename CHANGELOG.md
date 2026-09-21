@@ -17,6 +17,9 @@
 - Send estimate responses with `Cache-Control: no-store, private` so shared caches cannot serve one customer's rates to another
 - Declare `friendsofsymfony/rest-bundle` and `symfony/http-foundation` as direct dependencies; both are imported directly by the plugin and were previously relied on transitively
 - Fix the estimator's country field rendering its test attribute as `data-test-shipping-estimatecountry`; it is now `data-test-shipping-estimate-country`
+- Extract the estimate out of the controller into a `BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimatorInterface` service, answering with a `ShippingEstimate` value object
+- Add `BabDev\SyliusShippingEstimatePlugin\Http\ShippingEstimateResponderInterface` for the response the endpoint sends
+- Show the message from a `data-message-{reason}` attribute for an estimate reason the JavaScript does not recognize, so an application can report refusals of its own without replacing the script
 
 ## 0.2.0 (2022-07-15)
 

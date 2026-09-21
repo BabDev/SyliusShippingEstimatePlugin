@@ -24,6 +24,37 @@
                 return typeof provided === 'string' && provided !== '' ? provided : MESSAGE_FALLBACKS[key];
             };
 
+            /**
+             * Maps reason codes from snake case to Pascal case to find relevant data attributes with jQuery.
+             */
+            var reasonDataKey = function (reason) {
+                return reason
+                    .replace(/[-_]+([a-z0-9])/g, function (match, character) {
+                        return character.toUpperCase();
+                    })
+                    .replace(/^[a-z]/, function (character) {
+                        return character.toUpperCase();
+                    })
+                ;
+            };
+
+            /**
+             * The message the widget markup carries for a reason this script does not know, or null.
+             *
+             * An estimator of an integrator's own reports whatever its carriers refuse for, and those
+             * reasons cannot be listed here. Wording one is a `data-message-{reason}` attribute on the
+             * form rather than a replacement for this script.
+             */
+            var reasonMessage = function (reason) {
+                if (typeof reason !== 'string' || reason === '') {
+                    return null;
+                }
+
+                var provided = form.data('message' + reasonDataKey(reason));
+
+                return typeof provided === 'string' && provided !== '' ? provided : null;
+            };
+
             var showEnterAddress = function () {
                 enterAddressMessage.removeClass('hidden');
                 noOptionsMessage.addClass('hidden');
@@ -116,7 +147,7 @@
                             return;
                         }
 
-                        showError(message('genericError'));
+                        showError(reasonMessage(response.reason) || message('genericError'));
                         showEnterAddress();
                     },
                     error: function (jqXHR) {
@@ -151,7 +182,7 @@
                                 break;
 
                             default:
-                                showError(message('genericError'));
+                                showError(reasonMessage(payload.reason) || message('genericError'));
                                 showEnterAddress();
 
                                 break;

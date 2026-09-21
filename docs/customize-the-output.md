@@ -19,10 +19,27 @@ The messages the JavaScript shows are read from `data-message-*` attributes on t
 | `data-message-calculator-error`   | `babdev_sylius_shipping_estimate.ui.sorry_there_was_a_temporary_error_calculating_shipping` |
 | `data-message-estimate-cancelled` | `babdev_sylius_shipping_estimate.ui.the_shipping_estimate_was_cancelled`                    |
 | `data-message-generic-error`      | `babdev_sylius_shipping_estimate.ui.error_getting_shipping_estimates_please_try_again`      |
+| `data-message-rate-limited`       | `babdev_sylius_shipping_estimate.ui.shipping_estimates_requested_too_quickly`               |
 
 To change the wording, override those translation keys in your application's translation files. If you override the widget template, keep these attributes; the script falls back to its own English strings when one is missing.
 
 Note the cancellation message is only a fallback. When an event listener passes a reason to `cancelEstimate()`, that reason is displayed instead.
+
+### Messages For Your Own Reasons
+
+An estimate that found no rates carries a reason, and a replacement estimator may report reasons the plugin knows nothing about. The script looks any reason it does not recognize up as a `data-message-{reason}` attribute on the estimator form, so wording one does not mean forking the JavaScript.
+
+A `package_overweight` reason is read from `data-message-package-overweight`. Add it to the overridden widget template, after the block that builds `estimator_attributes`:
+
+```twig
+{% set estimator_attributes = estimator_attributes|merge({
+    'data-message-package-overweight': 'app.shipping.your_order_is_too_heavy_to_ship'|trans,
+}) %}
+```
+
+Underscores in the reason become hyphens in the attribute name. When no matching attribute is present, the generic error message is shown instead.
+
+See [Replacing the Estimator](/open-source/packages/shipping-estimate-plugin/docs/1.x/replacing-the-estimator) for where reasons come from.
 
 ## JavaScript
 
