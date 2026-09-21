@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace spec\BabDev\SyliusShippingEstimatePlugin\Estimator;
 
+use Prophecy\Prophecy\ObjectProphecy;
 use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimate;
 use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimateOption;
 use BabDev\SyliusShippingEstimatePlugin\Estimator\ShippingEstimateReasons;
@@ -73,9 +74,7 @@ class ShippingEstimatorSpec extends ObjectBehavior
         // Keyed by method code, so a rate can only be right if that method was put on the shipment first.
         $rates = ['dhl' => 2000, 'ups' => 2500];
 
-        $shippingCalculator->calculate(Argument::any())->will(static function (array $args) use ($rates): int {
-            return $rates[(string) $args[0]->getMethod()->getCode()];
-        });
+        $shippingCalculator->calculate(Argument::any())->will(static fn(array $args): int => $rates[(string) $args[0]->getMethod()->getCode()]);
 
         $this->estimate($cart, $this->createEstimateAddress())->shouldBeLike(ShippingEstimate::of(
             new ShippingEstimateOption('dhl', 'DHL', 2000, 'USD'),
@@ -237,7 +236,7 @@ class ShippingEstimatorSpec extends ObjectBehavior
     }
 
     /**
-     * @param ShippingMethodInterface&\Prophecy\Prophecy\ObjectProphecy $method
+     * @param ShippingMethodInterface&ObjectProphecy $method
      */
     private function describeMethod($method, string $code, string $name): void
     {

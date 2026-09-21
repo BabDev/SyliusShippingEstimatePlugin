@@ -12,7 +12,7 @@ final class BeforeEstimateShippingEvent extends Event
 {
     private ?string $cancelReason = null;
 
-    public function __construct(private OrderInterface $cart, private AddressInterface $address)
+    public function __construct(private readonly OrderInterface $cart, private AddressInterface $address)
     {
     }
 

@@ -26,15 +26,15 @@ use Twig\Environment;
 final class ShippingEstimatorController
 {
     public function __construct(
-        private MetadataInterface $metadata,
-        private RequestConfigurationFactoryInterface $requestConfigurationFactory,
-        private CartContextInterface $cartContext,
-        private FormFactoryInterface $formFactory,
-        private Environment $twig,
-        private AddressFactoryInterface $addressFactory,
-        private ShippingEstimatorInterface $estimator,
-        private ShippingEstimateResponderInterface $responder,
-        private ?RateLimiterFactory $rateLimiterFactory = null,
+        private readonly MetadataInterface $metadata,
+        private readonly RequestConfigurationFactoryInterface $requestConfigurationFactory,
+        private readonly CartContextInterface $cartContext,
+        private readonly FormFactoryInterface $formFactory,
+        private readonly Environment $twig,
+        private readonly AddressFactoryInterface $addressFactory,
+        private readonly ShippingEstimatorInterface $estimator,
+        private readonly ShippingEstimateResponderInterface $responder,
+        private readonly ?RateLimiterFactory $rateLimiterFactory = null,
     ) {
     }
 
@@ -125,7 +125,7 @@ final class ShippingEstimatorController
      */
     private function enforceRateLimit(Request $request): ?Response
     {
-        if (null === $this->rateLimiterFactory) {
+        if (!$this->rateLimiterFactory instanceof RateLimiterFactory) {
             return null;
         }
 

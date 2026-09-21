@@ -15,8 +15,8 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 final class EventDispatchingShippingEstimator implements ShippingEstimatorInterface
 {
     public function __construct(
-        private ShippingEstimatorInterface $estimator,
-        private EventDispatcherInterface $eventDispatcher,
+        private readonly ShippingEstimatorInterface $estimator,
+        private readonly EventDispatcherInterface $eventDispatcher,
     ) {
     }
 

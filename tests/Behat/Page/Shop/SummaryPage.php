@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\BabDev\SyliusShippingEstimatePlugin\Behat\Page\Shop;
 
 use Sylius\Behat\Page\Shop\Cart\SummaryPage as BaseSummaryPage;
-use Sylius\Behat\Service\JQueryHelper;
 
 class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
 {

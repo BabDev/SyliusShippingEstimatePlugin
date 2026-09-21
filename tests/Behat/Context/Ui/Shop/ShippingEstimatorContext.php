@@ -11,7 +11,7 @@ use Webmozart\Assert\Assert;
 
 final class ShippingEstimatorContext implements Context
 {
-    public function __construct(private SummaryPageInterface $summaryPage)
+    public function __construct(private readonly SummaryPageInterface $summaryPage)
     {
     }
 
@@ -111,8 +111,8 @@ final class ShippingEstimatorContext implements Context
         // Compared loosely so the assertion covers the rates without pinning the row order.
         Assert::eq($actual, $expected, sprintf(
             'Expected shipping options [%s] but got [%s].',
-            self::describeOptions($expected),
-            self::describeOptions($actual),
+            $this->describeOptions($expected),
+            $this->describeOptions($actual),
         ));
     }
 
@@ -127,7 +127,7 @@ final class ShippingEstimatorContext implements Context
     /**
      * @param array<string, string> $options
      */
-    private static function describeOptions(array $options): string
+    private function describeOptions(array $options): string
     {
         $described = [];
 

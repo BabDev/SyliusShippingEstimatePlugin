@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\PHPUnit\CodeQuality\Rector\ClassMethod\ReplaceTestAnnotationWithPrefixedFunctionRector;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -11,6 +12,9 @@ return RectorConfig::configure()
     ->withSkipPath(__DIR__.'/tests/Application/config/bundles.php')
     ->withSkipPath(__DIR__.'/tests/Application/node_modules')
     ->withSkipPath(__DIR__.'/tests/Application/var')
+    ->withSkip([
+        ReplaceTestAnnotationWithPrefixedFunctionRector::class,
+    ])
     ->withImportNames(importShortClasses: false)
     ->withPHPStanConfigs([
         __DIR__.'/vendor/phpstan/phpstan-doctrine/extension.neon',

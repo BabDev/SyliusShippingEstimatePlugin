@@ -16,8 +16,8 @@ use Sylius\Component\Shipping\Resolver\ShippingMethodsResolverInterface;
 final class ShippingEstimator implements ShippingEstimatorInterface
 {
     public function __construct(
-        private ShippingMethodsResolverInterface $shippingMethodsResolver,
-        private DelegatingCalculatorInterface $shippingCalculator,
+        private readonly ShippingMethodsResolverInterface $shippingMethodsResolver,
+        private readonly DelegatingCalculatorInterface $shippingCalculator,
     ) {
     }
 

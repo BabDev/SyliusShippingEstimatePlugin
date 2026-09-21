@@ -34,7 +34,7 @@ final class ShippingEstimateResponder implements ShippingEstimateResponderInterf
      * @param array<string, int> $statusCodes Reason code to HTTP status map, for an integrator that answers a reason differently than this plugin does
      */
     public function __construct(
-        private MoneyFormatterInterface $moneyFormatter,
+        private readonly MoneyFormatterInterface $moneyFormatter,
         private array $statusCodes = self::DEFAULT_STATUS_CODES,
     ) {
     }
@@ -63,7 +63,7 @@ final class ShippingEstimateResponder implements ShippingEstimateResponderInterf
         $payload = [
             'error' => !$estimate->isSuccessful(),
             'options' => array_map(
-                fn (ShippingEstimateOption $option): array => $this->buildOption($option),
+                $this->buildOption(...),
                 $estimate->options(),
             ),
             'reason' => $estimate->reason(),
