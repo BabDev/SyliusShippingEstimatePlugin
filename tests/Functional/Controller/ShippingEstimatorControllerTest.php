@@ -35,6 +35,7 @@ use Sylius\Component\Shipping\Resolver\ShippingMethodsResolverInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
+use Symfony\Component\Form\Extension\Validator\ValidatorExtension;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\Forms;
 use Symfony\Component\Form\PreloadedExtension;
@@ -43,6 +44,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\InMemoryStorage;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\Validator\Validation;
 use Twig\Environment;
 
 final class ShippingEstimatorControllerTest extends TestCase
@@ -56,6 +58,27 @@ final class ShippingEstimatorControllerTest extends TestCase
 
         // Carries none of the form's fields, so the form is never submitted at all.
         $response = $controller->estimateShipping($this->createEstimateRequest([]));
+
+        self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+        self::assertJsonStringEqualsJsonString(
+            json_encode([
+                'error' => true,
+                'options' => [],
+                'reason' => 'shipping_estimate_invalid_request',
+            ], \JSON_THROW_ON_ERROR),
+            (string) $response->getContent(),
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function it_answers_a_half_filled_address_with_the_invalid_request_reason(): void
+    {
+        $controller = $this->createController(new EventDispatcher());
+
+        // Submitted, so it is the constraints rather than the missing submission that reject it.
+        $response = $controller->estimateShipping($this->createEstimateRequest(['country' => 'US']));
 
         self::assertSame(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
         self::assertJsonStringEqualsJsonString(
@@ -459,6 +482,8 @@ final class ShippingEstimatorControllerTest extends TestCase
 
         return Forms::createFormFactoryBuilder()
             ->addExtension(new HttpFoundationExtension())
+            // The estimator form's fields carry constraints, which are inert without this extension.
+            ->addExtension(new ValidatorExtension(Validation::createValidator(), false))
             // The estimator form disables CSRF protection, an option that only exists once this extension is registered.
             ->addExtension(new CsrfExtension($this->createMock(CsrfTokenManagerInterface::class)))
             ->addExtension(new PreloadedExtension([

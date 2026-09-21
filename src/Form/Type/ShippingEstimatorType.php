@@ -8,6 +8,7 @@ use Sylius\Bundle\AddressingBundle\Form\Type\CountryCodeChoiceType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 final class ShippingEstimatorType extends AbstractType
 {
@@ -17,9 +18,15 @@ final class ShippingEstimatorType extends AbstractType
             ->add('country', CountryCodeChoiceType::class, [
                 'label' => 'sylius.form.address.country',
                 'enabled' => true,
+                'constraints' => [
+                    new NotBlank(['message' => 'sylius.address.country.not_blank']),
+                ],
             ])
             ->add('postcode', TextType::class, [
                 'label' => 'sylius.form.address.postcode',
+                'constraints' => [
+                    new NotBlank(['message' => 'sylius.address.postcode.not_blank']),
+                ],
             ])
         ;
     }

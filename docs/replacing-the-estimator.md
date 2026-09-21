@@ -91,6 +91,8 @@ An estimate with no options in it always carries a reason. The plugin's own are 
 | `CANCELLED`        | `shipping_estimate_cancelled`       | A listener stopped the estimate                             |
 | `INVALID_REQUEST`  | `shipping_estimate_invalid_request` | The request did not describe an address, so no estimate ran |
 
+`INVALID_REQUEST` is decided before any estimator runs: a request missing a country or a postcode, or naming a country the shop does not list, is rejected by the estimator form's constraints, so your estimator is never called for one.
+
 Your estimator may report reasons of its own, including what your carriers actually refuse for, and nothing downstream assumes a reason came from that list. To word one for the customer, add a `data-message-{reason}` attribute to the widget's form; see [Customize the Output](/open-source/packages/shipping-estimate-plugin/docs/1.x/customize-the-output).
 
 ## Adding To The Response
