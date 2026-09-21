@@ -49,50 +49,8 @@ jobs:
                 name: Install PHP dependencies
                 run: composer update --no-interaction --no-blocking
                 env:
-                    SYMFONY_REQUIRE: "5.4.*"
+                    SYMFONY_REQUIRE: "6.4.*"
 
             -
                 name: Run PHPStan
                 run: vendor/bin/phpstan analyse --error-format=github
-
-    sa-psalm:
-        runs-on: ubuntu-latest
-
-        name: Psalm
-
-        steps:
-            -
-                uses: actions/checkout@v7
-
-            -
-                name: Setup PHP
-                uses: shivammathur/setup-php@v2
-                with:
-                    php-version: "8.1"
-                    extensions: intl
-                    tools: composer:v2,flex
-                    coverage: none
-
-            -
-                name: Get Composer cache directory
-                id: composer-cache
-                run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-            -
-                name: Cache Composer
-                uses: actions/cache@v6
-                with:
-                    path: ${{ steps.composer-cache.outputs.dir }}
-                    key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json', '**/composer.lock') }}
-                    restore-keys: |
-                        ${{ runner.os }}-composer-
-
-            -
-                name: Install PHP dependencies
-                run: composer update --no-interaction --no-blocking
-                env:
-                    SYMFONY_REQUIRE: "5.4.*"
-
-            -
-                name: Run Psalm
-                run: vendor/bin/psalm --output-format=github

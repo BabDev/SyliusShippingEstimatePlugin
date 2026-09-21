@@ -93,6 +93,9 @@ class SummaryPage extends BaseSummaryPage implements SummaryPageInterface
         $this->getDocument()->waitFor(10, static fn (): bool => !$form->hasClass('loading'));
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getDefinedElements(): array
     {
         return array_merge(parent::getDefinedElements(), [

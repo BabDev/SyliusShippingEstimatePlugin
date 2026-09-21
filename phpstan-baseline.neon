@@ -1,0 +1,7 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Tests\\BabDev\\SyliusShippingEstimatePlugin\\Behat\\Page\\Shop\\SummaryPage\:\:getDefinedElements\(\) should return array\<string, string\> but returns array\.$#'
+			identifier: return.type
+			count: 1
+			path: tests/Behat/Page/Shop/SummaryPage.php

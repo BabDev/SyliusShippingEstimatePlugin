@@ -22,7 +22,7 @@ final class BabDevSyliusShippingEstimatePlugin extends Bundle
      * Overridden because {@see SyliusPluginTrait} derives the expected extension alias from the plugin
      * name, which would underscore "BabDev" to "bab_dev" and not match this extension's alias.
      */
-    public function getContainerExtension(): ?ExtensionInterface
+    public function getContainerExtension(): ExtensionInterface
     {
         // The trait types this property as `ExtensionInterface|bool`; only ever assigned one here.
         if (!$this->containerExtension instanceof ExtensionInterface) {

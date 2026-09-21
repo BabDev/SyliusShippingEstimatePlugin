@@ -46,7 +46,7 @@ jobs:
                 name: Install PHP dependencies
                 run: composer update --no-interaction --no-blocking
                 env:
-                    SYMFONY_REQUIRE: "5.4.*"
+                    SYMFONY_REQUIRE: "6.4.*"
 
             -
                 name: Check coding standards

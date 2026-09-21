@@ -22,7 +22,6 @@ use Sylius\Bundle\ResourceBundle\Controller\RequestConfiguration;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfigurationFactoryInterface;
 use Sylius\Bundle\ResourceBundle\Controller\ViewHandlerInterface;
 use Sylius\Component\Addressing\Model\Country;
-use Sylius\Component\Addressing\Model\CountryInterface;
 use Sylius\Component\Core\Factory\AddressFactoryInterface;
 use Sylius\Component\Core\Model\Address;
 use Sylius\Component\Core\Model\Order;
@@ -462,7 +461,7 @@ final class ShippingEstimatorControllerTest extends TestCase
         $unitedStates = new Country();
         $unitedStates->setCode('US');
 
-        /** @var Stub&RepositoryInterface<CountryInterface> $countryRepository */
+        /** @var Stub&RepositoryInterface $countryRepository */
         $countryRepository = $this->createStub(RepositoryInterface::class);
         $countryRepository->method('getClassName')->willReturn(Country::class);
         $countryRepository->method('findBy')->willReturn([$unitedStates]);

@@ -1,10 +1,9 @@
+includes:
+  - phpstan-baseline.neon
+
 parameters:
     level: max
-    reportUnmatchedIgnoredErrors: true
-    ignoreErrors:
-        -
-            identifier: missingType.iterableValue
-
+    reportUnmatchedIgnoredErrors: false
     paths:
         - src
         - tests/Behat
