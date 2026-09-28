@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 (????-??-??)
+## 0.4.0 (2026-09-28)
 
 - Add support for Sylius 1.12 and Symfony 6.4
 - Drop support for Sylius 1.11
